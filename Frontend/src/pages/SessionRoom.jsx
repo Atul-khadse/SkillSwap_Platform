@@ -372,12 +372,16 @@ const SessionRoom = () => {
     if (!isScreenSharing) {
       try {
 
-
+ if (!navigator.mediaDevices.getDisplayMedia) {
+        toast.error('Screen sharing not supported in this browser');
+        return;
+      }
 //
 
         const screenStream = await navigator.mediaDevices.getDisplayMedia({
           video: {
-            cursor: "always"
+            cursor: "always",
+            frameRate: { ideal: 30 }
           },
           audio: false
         });
@@ -385,6 +389,7 @@ const SessionRoom = () => {
         screenStreamRef.current = screenStream;
         
         const screenTrack = screenStream.getVideoTracks()[0];
+        
         const sender = peerRef.current?._pc?.getSenders()?.find(s => s.track?.kind === 'video');
         
         if (sender && screenTrack) {

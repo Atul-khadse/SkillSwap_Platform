@@ -110,7 +110,7 @@ const handleSubmit = async (e) => {
         </div>
         <button
           onClick={() => setEditMode(!editMode)}
-          className={`px-4 py-2 rounded-lg flex items-center ${editMode ? 'bg-gray-200 text-gray-700' : 'bg-primary-600 text-white hover:bg-primary-700'}`}
+          className={`px-4 py-2 rounded-lg flex items-center ${editMode ? 'bg-gray-200 hover:cursor-pointer text-gray-700' : 'bg-gray-200 text-gray-700 hover:bg-gray-50 hover:cursor-pointer' } transition`}
         >
           <Pencil className="h-4 w-4 mr-2" />
           {editMode ? 'Cancel Edit' : 'Edit Profile'}
@@ -133,7 +133,7 @@ const handleSubmit = async (e) => {
               )}
             </div>
             <div className="ml-6">
-              <h2 className="text-2xl font-bold text-white">{formData.name}</h2>
+              <h2 className="text-2xl font-bold text-black">{formData.name}</h2>
               <p className="text-primary-100 mt-1">{formData.bio || 'No bio yet'}</p>
               <div className="flex items-center text-primary-100 mt-2 space-x-4">
                 {formData.location && (
@@ -301,7 +301,7 @@ const handleSubmit = async (e) => {
                   <button
                     type="button"
                     onClick={handleAddSkillOffered}
-                    className="w-full bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
+                    className="w-full hover:cursor-pointer bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
                   >
                     Add Skill
                   </button>
@@ -395,7 +395,7 @@ const handleSubmit = async (e) => {
                   <button
                     type="button"
                     onClick={handleAddSkillNeeded}
-                    className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+                    className="w-full bg-blue-600 hover:cursor-pointer text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
                   >
                     Add Skill
                   </button>
@@ -441,14 +441,14 @@ const handleSubmit = async (e) => {
               <button
                 type="button"
                 onClick={() => setEditMode(false)}
-                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
+                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:cursor-pointer hover:bg-gray-50 transition"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition disabled:opacity-50"
+                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:cursor-pointer hover:bg-gray-50 transition"
               >
                 {loading ? 'Saving...' : 'Save Changes'}
               </button>

@@ -55,7 +55,7 @@ const LandingPage = () => {
               {isAuthenticated ? (
                 <Link
                   to="/dashboard"
-                  className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition"
+                  className="bg-primary-600 text-gray-700 hover:cursor-pointer px-4 py-2 rounded-lg hover:bg-primary-700 transition"
                 >
                   Go to Dashboard
                 </Link>
@@ -63,13 +63,13 @@ const LandingPage = () => {
                 <>
                   <Link
                     to="/login"
-                    className="text-gray-700 hover:text-primary-600 px-3 py-2"
+                    className="text-gray-700 hover:cursor-pointer border-2 border-gray-300 rounded-lg hover:text-primary-600 px-3 py-2"
                   >
                     Login
                   </Link>
                   <Link
                     to="/register"
-                    className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition"
+                    className="border-2 border-gray-300 text-gray-700 hover:cursor-pointer px-4 py-2 rounded-lg hover:bg-primary-700 transition"
                   >
                     Get Started
                   </Link>
@@ -94,7 +94,7 @@ const LandingPage = () => {
           <div className="flex justify-center space-x-4">
             <Link
               to={isAuthenticated ? "/explore" : "/register"}
-              className="bg-primary-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-primary-700 transition flex items-center"
+              className="bg-primary-600 text-gray-700 border-2 border-gray-300 px-8 py-3 rounded-lg text-lg font-semibold hover:bg-primary-700 transition flex items-center"
             >
               Start Swapping
               <ArrowRight className="h-5 w-5 ml-2" />
@@ -133,15 +133,15 @@ const LandingPage = () => {
 
         {/* CTA Section */}
         <div className="mt-24 bg-gradient-to-r from-primary-600 to-secondary-600 rounded-2xl p-8 text-center text-white">
-          <h2 className="text-3xl font-bold mb-4">
+          <h2 className="text-3xl font-bold mb-4 text-black">
             Ready to Start Your Learning Journey?
           </h2>
-          <p className="text-xl mb-8 opacity-90">
+          <p className="text-xl mb-8 text-gray-700">
             Join thousands of learners and teachers exchanging skills right now.
           </p>
           <Link
             to={isAuthenticated ? "/explore" : "/register"}
-            className="bg-white text-primary-600 px-8 py-3 rounded-lg text-lg font-semibold hover:bg-gray-100 transition inline-flex items-center"
+            className="text-gray-700 border-2 border-gray-300 px-8 py-3 rounded-lg text-lg font-semibold hover:cursor-pointer hover:bg-gray-50 transition inline-flex items-center"
           >
             Get Started Free
             <ArrowRight className="h-5 w-5 ml-2" />

@@ -196,7 +196,7 @@ const Explore = () => {
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium hover:cursor-pointer text-gray-700 mb-1">
               Skill Level
             </label>
             <select
@@ -215,7 +215,7 @@ const Explore = () => {
           <div className="flex items-end">
             <button
               onClick={handleSearch}
-              className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition font-medium flex items-center justify-center"
+              className="w-full hover:cursor-pointer bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition font-medium flex items-center justify-center"
             >
               <Filter className="h-5 w-5 mr-2" />
               Search
@@ -315,7 +315,7 @@ const Explore = () => {
                         </span>
                       ))}
                       {user.skillsNeeded?.length > 3 && (
-                        <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
+                        <span className="px-2 py-1 bg-gray-100 hover:cursor-pointer text-gray-600 text-xs rounded-full">
                           +{user.skillsNeeded.length - 3} more
                         </span>
                       )}
@@ -336,7 +336,7 @@ const Explore = () => {
                     setSelectedUser(user);
                     setShowRequestModal(true);
                   }}
-                  className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition font-medium"
+                  className="w-full hover:cursor-pointer bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition font-medium"
                 >
                   Send Exchange Request
                 </button>
@@ -348,7 +348,7 @@ const Explore = () => {
 
       {/* Request Modal */}
       {showRequestModal && selectedUser && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-blue-50 bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl shadow-lg max-w-md w-full p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
               Send Exchange Request to {selectedUser.name}
@@ -362,7 +362,7 @@ const Explore = () => {
                 <select
                   value={requestData.skillOffered}
                   onChange={(e) => setRequestData({ ...requestData, skillOffered: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border hover:cursor-pointer border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="">Select a skill</option>
                   {selectedUser.skillsNeeded?.map((skill, index) => (
@@ -380,7 +380,7 @@ const Explore = () => {
                 <select
                   value={requestData.skillRequested}
                   onChange={(e) => setRequestData({ ...requestData, skillRequested: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border hover:cursor-pointer border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="">Select a skill</option>
                   {selectedUser.skillsOffered?.map((skill, index) => (
@@ -411,13 +411,13 @@ const Explore = () => {
                   setShowRequestModal(false);
                   setSelectedUser(null);
                 }}
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
+                className="px-4 py-2 border hover:cursor-pointer border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSendRequest}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                className="px-4 py-2 bg-blue-600 hover:cursor-pointer text-white rounded-lg hover:bg-blue-700 transition"
                 disabled={!requestData.skillOffered || !requestData.skillRequested}
               >
                 Send Request

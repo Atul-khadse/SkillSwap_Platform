@@ -258,14 +258,14 @@ const MatchedPairs = () => {
                   <div className="mt-6 flex space-x-3">
                     <button
                       onClick={() => startSession(pair)}
-                      className="flex-1 bg-primary-600 text-white py-2 px-4 rounded-lg hover:bg-primary-700 transition flex items-center justify-center"
+                      className="flex-1 border border-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:cursor-pointer hover:bg-gray-50 transition flex items-center justify-center"
                     >
                       <Video className="h-4 w-4 mr-2" />
                       Start Session
                     </button>
                     <Link
                       to={`/session/${pair._id}`}
-                      className="flex-1 border border-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-50 transition flex items-center justify-center"
+                      className="flex-1 border border-gray-300 text-gray-700  py-2 px-4 rounded-lg hover:bg-gray-50  transition flex items-center justify-center"
                     >
                       <MessageCircle className="h-4 w-4 mr-2" />
                       View Dashboard
@@ -275,7 +275,7 @@ const MatchedPairs = () => {
                         setSelectedPair(pair);
                         setShowCreateSession(true);
                       }}
-                      className="border border-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-50 transition"
+                      className="border hover:cursor-pointer border-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-50 transition"
                       title="Schedule Session"
                     >
                       <Plus className="h-4 w-4" />
@@ -290,8 +290,8 @@ const MatchedPairs = () => {
 
       {/* Create Session Modal */}
       {showCreateSession && selectedPair && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl shadow-lg max-w-md w-full p-6">
+        <div className="fixed inset-0 bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-cyan-500  rounded-xl shadow-lg max-w-md w-full p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
               Schedule New Session
             </h3>
@@ -334,7 +334,7 @@ const MatchedPairs = () => {
                       type="datetime-local"
                       value={sessionData.scheduledTime}
                       onChange={(e) => setSessionData({ ...sessionData, scheduledTime: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                      className="w-full px-3 py-2 border hover:cursor-pointer border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                       required
                     />
                   </div>
@@ -345,8 +345,9 @@ const MatchedPairs = () => {
                     <select
                       value={sessionData.duration}
                       onChange={(e) => setSessionData({ ...sessionData, duration: parseInt(e.target.value) })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                      className="w-full px-3 py-2 border hover:cursor-pointer border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                     >
+                     
                       <option value="30">30 min</option>
                       <option value="60">60 min</option>
                       <option value="90">90 min</option>
@@ -390,7 +391,7 @@ const MatchedPairs = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition"
+                  className="px-4 py-2 bg-primary-600 border hover:cursor-pointer hover:bg-gray-50 border-gray-300 text-gray-700 rounded-lg hover:bg-primary-700 transition"
                 >
                   Schedule Session
                 </button>
