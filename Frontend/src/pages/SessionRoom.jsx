@@ -97,86 +97,130 @@ const SessionRoom = () => {
     }
   };
 
-  const SOCKET_URL =
-  import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
+// With this:
+const SOCKET_URL = import.meta.env.VITE_API_URL 
+  ? import.meta.env.VITE_API_URL.replace('https://', 'wss://').replace('http://', 'ws://')
+  : 'http://localhost:5000';
 
-  const initSocket = () => {
-    // Connect to Socket.io server
-    socketRef.current = io(SOCKET_URL, {
-      transports: ['websocket', 'polling'],
-      withCredentials: true
-    });
+// Then in initSocket function:
+const initSocket = () => {
+  console.log('🔌 Connecting to Socket.io at:', SOCKET_URL);
+  
+  socketRef.current = io(SOCKET_URL, {
+    transports: ['websocket', 'polling'],
+    withCredentials: true,
+    reconnection: true,
+    reconnectionAttempts: 10,
+    reconnectionDelay: 1000,
+    timeout: 20000
+  });
 
-    // Socket event listeners
-    socketRef.current.on('connect', () => {
-      console.log('Socket connected:', socketRef.current.id);
-      
-      // Join the room
-      socketRef.current.emit('join-room', {
-        roomId: pairId,
-        userId: user._id,
-        userName: user.name
-      });
-    });
-
-    socketRef.current.on('room-users', (users) => {
-      console.log('Users in room:', users);
-    });
-
-    socketRef.current.on('user-joined', (userData) => {
-      console.log('User joined:', userData);
-      toast.info(`${userData.userName} joined the session`);
-    });
-
-    socketRef.current.on('user-left', (userData) => {
-      console.log('User left:', userData);
-      toast.info(`${userData.userName} left the session`);
-      
-      // Cleanup peer connection if user left
-      if (peerRef.current) {
-        peerRef.current.destroy();
-        peerRef.current = null;
-      }
-    });
-
-    socketRef.current.on('signal', (data) => {
-      console.log('Received signal:', data.type);
-      if (peerRef.current) {
-        peerRef.current.signal(data);
-      }
-    });
+  // Socket event listeners
+  socketRef.current.on('connect', () => {
+    console.log('✅ Socket connected:', socketRef.current.id);
     
-    // Chat messages
-    socketRef.current.on('receive-message', (message) => {
-      setMessages(prev => [...prev, {
-        ...message,
-        sender: message.senderName === user.name ? 'You' : message.senderName
-      }]);
+    // Join the room
+    socketRef.current.emit('join-room', {
+      roomId: pairId,
+      userId: user._id,
+      userName: user.name
     });
+  });
 
-    socketRef.current.on('typing', ({ userName, isTyping }) => {
-      if (userName !== user.name) {
-        setTypingUsers(prev => {
-          if (isTyping && !prev.includes(userName)) {
-            return [...prev, userName];
-          } else if (!isTyping) {
-            return prev.filter(name => name !== userName);
-          }
-          return prev;
-        });
+  socketRef.current.on('connect_error', (error) => {
+    console.error('❌ Socket connection error:', error);
+    toast.error('Failed to connect to server. Trying to reconnect...');
+  });
+
+  socketRef.current.on('room-users', (users) => {
+    console.log('👥 Users in room:', users);
+    
+    // Check if both users are present
+    if (users.length >= 2) {
+      console.log('✅ Both users are in the room');
+      toast.success('Partner is in the session!');
+    }
+  });
+
+  socketRef.current.on('user-joined', (userData) => {
+    console.log('👋 User joined:', userData);
+    toast.success(`${userData.userName} joined the session`);
+    
+    // When a user joins, reinitialize WebRTC if not already connected
+    if (!peerRef.current) {
+      console.log('Reinitializing WebRTC for new user');
+      setTimeout(() => {
+        initWebRTC();
+      }, 1000);
+    }
+  });
+
+  socketRef.current.on('user-left', (userData) => {
+    console.log('👋 User left:', userData);
+    toast.info(`${userData.userName} left the session`);
+    
+    // Cleanup peer connection
+    if (peerRef.current) {
+      peerRef.current.destroy();
+      peerRef.current = null;
+    }
+  });
+
+  socketRef.current.on('signal', (data) => {
+    console.log('📡 Received WebRTC signal:', data.type);
+    
+    if (!peerRef.current) {
+      console.log('Creating peer for incoming signal');
+      initWebRTC();
+    }
+    
+    setTimeout(() => {
+      if (peerRef.current && !peerRef.current.destroyed) {
+        console.log('Processing signal with peer');
+        peerRef.current.signal(data);
+      } else {
+        console.error('No peer available to process signal');
       }
-    });
+    }, 500);
+  });
+  
+  // Chat messages
+  socketRef.current.on('receive-message', (message) => {
+    console.log('💬 Received chat message:', message);
+    
+    setMessages(prev => [...prev, {
+      ...message,
+      sender: message.senderName === user.name ? 'You' : message.senderName
+    }]);
+  });
 
-    socketRef.current.on('screen-sharing', ({ userId, isSharing }) => {
-      console.log(`User ${userId} is ${isSharing ? 'sharing screen' : 'stopped sharing screen'}`);
-    });
+  socketRef.current.on('typing', ({ userName, isTyping }) => {
+    if (userName !== user.name) {
+      setTypingUsers(prev => {
+        if (isTyping && !prev.includes(userName)) {
+          return [...prev, userName];
+        } else if (!isTyping) {
+          return prev.filter(name => name !== userName);
+        }
+        return prev;
+      });
+    }
+  });
 
-    socketRef.current.on('error', (error) => {
-      console.error('Socket error:', error);
-      toast.error('Connection error');
-    });
-  };
+  socketRef.current.on('screen-sharing', ({ userId, isSharing }) => {
+    console.log(`🎥 User ${userId} is ${isSharing ? 'sharing screen' : 'stopped sharing screen'}`);
+  });
+
+  socketRef.current.on('error', (error) => {
+    console.error('⚠️ Socket error:', error);
+  });
+};
+
+
+
+
+
 
   const initMedia = async () => {
     try {
@@ -208,52 +252,91 @@ const SessionRoom = () => {
   };
 
   const initWebRTC = () => {
+  try {
+    console.log('Initializing WebRTC with user:', user._id);
+    
+    // Check if we have a stream
+    if (!localStreamRef.current) {
+      console.log('No local stream available for WebRTC');
+      return;
+    }
+
+    // Determine who should be initiator based on user ID (so both don't try to initiate)
+    // User with lower ID becomes initiator
+    const otherUser = getOtherUser();
+    const otherUserId = otherUser?._id;
+    const isInitiator = user._id < otherUserId;
+    
+    console.log('WebRTC initiator decision:', {
+      userId: user._id,
+      otherUserId,
+      isInitiator
+    });
+
     // Create peer connection
     peerRef.current = new Peer({
-      initiator: true,
+      initiator: isInitiator,
       trickle: true,
       stream: localStreamRef.current,
       config: {
         iceServers: [
           { urls: 'stun:stun.l.google.com:19302' },
           { urls: 'stun:stun1.l.google.com:19302' },
-          { urls: 'stun:stun2.l.google.com:19302' },
-          { urls: 'stun:stun3.l.google.com:19302' },
-          { urls: 'stun:stun4.l.google.com:19302' }
+          { urls: 'stun:stun2.l.google.com:19302' }
         ]
       }
     });
 
     // Peer event listeners
     peerRef.current.on('signal', (data) => {
+      console.log('WebRTC signaling data (type):', data.type);
+      
       // Send signaling data through socket
-      socketRef.current.emit('signal', {
-        roomId: pairId,
-        data: data
-      });
-    });
-
-    peerRef.current.on('stream', (stream) => {
-      // Set remote video stream
-      if (remoteVideoRef.current) {
-        remoteVideoRef.current.srcObject = stream;
+      if (socketRef.current && socketRef.current.connected) {
+        socketRef.current.emit('signal', {
+          roomId: pairId,
+          data: data
+        });
+      } else {
+        console.error('Socket not connected for signaling');
       }
     });
 
-    peerRef.current.on('error', (error) => {
-      console.error('Peer error:', error);
-      toast.error('Connection error. Please try again.');
-    });
-
-    peerRef.current.on('close', () => {
-      console.log('Peer connection closed');
-      peerRef.current = null;
+    peerRef.current.on('stream', (stream) => {
+      console.log('Received remote stream! Tracks:', 
+        stream.getTracks().map(t => `${t.kind}:${t.enabled}`));
+      
+      // Set remote video stream
+      if (remoteVideoRef.current) {
+        remoteVideoRef.current.srcObject = stream;
+        
+        // Try to play it
+        remoteVideoRef.current.play().catch(e => {
+          console.error('Error playing remote video:', e);
+        });
+      }
     });
 
     peerRef.current.on('connect', () => {
-      console.log('WebRTC connection established');
+      console.log('✅ WebRTC connection established!');
+      toast.success('Connected to partner!');
     });
-  };
+
+    peerRef.current.on('error', (error) => {
+      console.error('❌ Peer error:', error);
+      toast.error('Connection error. Please refresh.');
+    });
+
+    peerRef.current.on('close', () => {
+      console.log('WebRTC connection closed');
+      peerRef.current = null;
+    });
+
+  } catch (error) {
+    console.error('Error initializing WebRTC:', error);
+    toast.error('Failed to initialize connection');
+  }
+};
 
  const initSessionData = async () => {
   try {
@@ -333,15 +416,27 @@ const SessionRoom = () => {
   }
 };
 
-  const getOtherUser = () => {
-    if (!pairDetails || !user) return null;
-    
-    if (pairDetails.user1._id === user._id) {
-      return pairDetails.user2;
-    } else {
-      return pairDetails.user1;
-    }
-  };
+ const getOtherUser = () => {
+  if (!pairDetails || !user) return null;
+  
+  console.log('Getting other user from pairDetails:', {
+    pairDetails,
+    user: user._id,
+    user1: pairDetails.user1?._id || pairDetails.user1,
+    user2: pairDetails.user2?._id || pairDetails.user2
+  });
+  
+  // Handle both populated user object and just user ID
+  const user1Id = pairDetails.user1?._id || pairDetails.user1;
+  const user2Id = pairDetails.user2?._id || pairDetails.user2;
+  
+  if (user1Id === user._id) {
+    // Return full user object if populated, otherwise just ID
+    return pairDetails.user2 || { _id: user2Id, name: 'Partner' };
+  } else {
+    return pairDetails.user1 || { _id: user1Id, name: 'Partner' };
+  }
+};
 
   const sendMessage = (e) => {
     e.preventDefault();
@@ -552,6 +647,11 @@ const SessionRoom = () => {
       }
     }
   };
+
+
+  
+
+
 
   const cleanup = () => {
     if (peerRef.current) {
