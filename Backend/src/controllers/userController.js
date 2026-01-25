@@ -94,16 +94,23 @@ const searchUsers = async (req, res) => {
 // @access  Private
 const getPotentialMatches = async (req, res) => {
   try {
+    console.log('Finding potential matches for user:', req.user._id);
+    
     const user = await User.findById(req.user._id);
     
     if (!user) {
+      console.log('User not found:', req.user._id);
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Find users who need skills I offer and offer skills I need
-    const potentialMatches = await User.find({
+    console.log('Current user skills:', {
+      offered: user.skillsOffered.map(s => s.name),
+      needed: user.skillsNeeded.map(s => s.name)
+    });
+
+    // Build query without isAvailable
+    const query = {
       _id: { $ne: user._id },
-      isAvailable: true,
       $or: [
         {
           'skillsNeeded.name': { 
@@ -116,9 +123,32 @@ const getPotentialMatches = async (req, res) => {
           }
         }
       ]
-    })
-    .select('-password')
-    .limit(20);
+    };
+
+    console.log('Query for potential matches:', JSON.stringify(query, null, 2));
+
+    const potentialMatches = await User.find(query)
+      .select('-password')
+      .limit(20);
+
+    console.log(`Found ${potentialMatches.length} potential matches`);
+
+    if (potentialMatches.length === 0) {
+      // If no skill matches, try to get any users (except current)
+      console.log('No skill matches found, getting all other users');
+      const allUsers = await User.find({ _id: { $ne: user._id } })
+        .select('-password')
+        .limit(20);
+      
+      console.log(`Found ${allUsers.length} other users`);
+      
+      const matchesWithScore = allUsers.map(match => ({
+        ...match.toObject(),
+        matchScore: 0 // No match score since no skill overlap
+      }));
+      
+      return res.json(matchesWithScore);
+    }
 
     // Calculate match score for each potential match
     const matchesWithScore = potentialMatches.map(match => {
@@ -156,8 +186,10 @@ const getPotentialMatches = async (req, res) => {
     // Sort by match score
     matchesWithScore.sort((a, b) => b.matchScore - a.matchScore);
 
+    console.log('Returning matches with scores');
     res.json(matchesWithScore);
   } catch (error) {
+    console.error('Error in getPotentialMatches:', error);
     res.status(500).json({ message: error.message });
   }
 };
