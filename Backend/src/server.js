@@ -20,14 +20,33 @@ const app = express();
 const server = http.createServer(app);
 
 // Middleware
-// CORS Configuration - Allow both 3000 and 5173 ports
+// CORS Configuration - Fixed version
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:5173'
+];
+
+// Add environment variable if it exists
+if (process.env.FRONTEND_URL) {
+  allowedOrigins.push(process.env.FRONTEND_URL);
+}
+
 const corsOptions = {
-  origin: ['http://localhost:3000', 'http://localhost:5173'],
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps, curl, Postman)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      console.log('CORS blocked for origin:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 };
-
 
 app.use(cors(corsOptions));
 app.use(express.json());
