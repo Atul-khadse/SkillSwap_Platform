@@ -49,8 +49,30 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+
+
+// Add this after CORS middleware
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
+  console.log('Origin:', req.headers.origin);
+  next();
+});
+
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+
+// Explicitly handle OPTIONS preflight for all routes
+app.options('*', (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.sendStatus(200);
+});
+
+
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -67,7 +89,7 @@ app.get('/', (req, res) => {
 // Initialize Socket.io with CORS
 const io = socketIo(server, {
   cors: {
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    origin:  allowedOrigins,
     methods: ["GET", "POST"],
     credentials: true
   },
