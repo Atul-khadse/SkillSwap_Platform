@@ -1,24 +1,50 @@
 const User = require('../models/User');
 const { generateToken } = require('../middleware/auth');
 
+
+
 // @desc    Register user
 // @route   POST /api/auth/register
 // @access  Public
-// In the registerUser function, update it to hash password manually:
 const registerUser = async (req, res) => {
   try {
+    console.log('\n=== REGISTRATION REQUEST ===');
+    console.log('Full request body:', JSON.stringify(req.body, null, 2));
+    console.log('Request headers:', req.headers);
+    
     const { name, email, password, skillsOffered, skillsNeeded } = req.body;
 
-    console.log('Registration attempt for:', email);
+    // Log what we're getting
+    console.log('Parsed fields:', {
+      name: !!name,
+      email: !!email,
+      password: !!password ? '***' : 'missing',
+      skillsOffered: skillsOffered ? `Array(${skillsOffered.length})` : 'none',
+      skillsNeeded: skillsNeeded ? `Array(${skillsNeeded.length})` : 'none'
+    });
 
+    // Validation
+    if (!name || !email || !password) {
+      console.log('Validation failed - missing fields:', { name, email, password: !!password });
+      return res.status(400).json({ 
+        message: 'Please provide all required fields (name, email, password)',
+        received: { name: !!name, email: !!email, password: !!password }
+      });
+    }
+
+    console.log('Checking if user exists...');
     const userExists = await User.findOne({ email });
     if (userExists) {
+      console.log('User already exists for email:', email);
       return res.status(400).json({ message: 'User already exists' });
     }
 
+    console.log('Hashing password...');
     // Hash password manually
     const hashedPassword = await User.hashPassword(password);
+    console.log('Password hashed successfully');
 
+    console.log('Creating user...');
     const user = await User.create({
       name,
       email,
@@ -27,19 +53,79 @@ const registerUser = async (req, res) => {
       skillsNeeded: skillsNeeded || [],
     });
 
-    console.log('User created:', user._id);
+    console.log('User created successfully:', {
+      id: user._id,
+      name: user.name,
+      email: user.email
+    });
+
+    // Check JWT_SECRET
+    if (!process.env.JWT_SECRET) {
+      console.error('FATAL: JWT_SECRET is not defined in environment variables');
+      return res.status(500).json({ 
+        message: 'Server configuration error',
+        hint: 'Check JWT_SECRET environment variable'
+      });
+    }
+
+    const token = generateToken(user._id);
+    console.log('JWT token generated');
 
     res.status(201).json({
       _id: user._id,
       name: user.name,
       email: user.email,
-      token: generateToken(user._id),
+      token,
+      skillsOffered: user.skillsOffered,
+      skillsNeeded: user.skillsNeeded
     });
+
   } catch (error) {
-    console.error('Registration error details:', error);
-    res.status(500).json({ message: error.message });
+    console.error('\n=== REGISTRATION ERROR ===');
+    console.error('Error name:', error.name);
+    console.error('Error message:', error.message);
+    console.error('Error code:', error.code);
+    console.error('Error stack:', error.stack);
+    
+    // Handle specific mongoose errors
+    if (error.name === 'ValidationError') {
+      console.error('Validation errors:', error.errors);
+      const messages = Object.values(error.errors).map(val => val.message);
+      return res.status(400).json({ 
+        message: 'Validation failed',
+        errors: messages 
+      });
+    }
+    
+    if (error.code === 11000) {
+      console.error('Duplicate key error:', error.keyValue);
+      return res.status(400).json({ 
+        message: 'Email already exists',
+        field: Object.keys(error.keyValue)[0]
+      });
+    }
+    
+    // Handle database connection errors
+    if (error.name === 'MongoServerError' || error.name === 'MongooseError') {
+      console.error('Database error:', error);
+      return res.status(500).json({ 
+        message: 'Database connection error',
+        hint: 'Check MongoDB connection string'
+      });
+    }
+    
+    console.error('Unknown error:', error);
+    res.status(500).json({ 
+      message: 'Server error during registration',
+      ...(process.env.NODE_ENV === 'development' && { 
+        error: error.message,
+        stack: error.stack 
+      })
+    });
   }
 };
+
+
 
 // @desc    Auth user & get token
 // @route   POST /api/auth/login

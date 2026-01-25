@@ -59,11 +59,17 @@ const Register = () => {
         skillsNeeded: [{ name: 'JavaScript', level: 'beginner' }], // Default
       };
 
+      console.log('Sending registration data:', userData);
+
       const result = await register(userData);
+
+       console.log('Registration response:', result);
       if (result.success) {
         navigate('/dashboard');
       }
     } catch (error) {
+       console.error('Registration error:', error);
+    console.error('Error response:', error.response?.data);
       toast.error('Registration failed. Please try again.');
     } finally {
       setLoading(false);

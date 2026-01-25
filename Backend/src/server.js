@@ -22,8 +22,8 @@ const server = http.createServer(app);
 // Middleware
 // CORS Configuration - Fixed version
 const allowedOrigins = [
-  'http://localhost:3000',
-  'http://localhost:5173'
+  'http://localhost:5173',
+  'https://skillswap-platform-frontend.onrender.com'
 ];
 
 // Add environment variable if it exists
@@ -52,25 +52,14 @@ app.use(cors(corsOptions));
 
 
 // Add this after CORS middleware
-app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
-  console.log('Origin:', req.headers.origin);
-  next();
-});
 
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 
-// Explicitly handle OPTIONS preflight for all routes
-app.options('*', (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', req.headers.origin || '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.sendStatus(200);
-});
+// ✅ Use regex instead of string for wildcard
+
 
 
 
