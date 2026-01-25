@@ -97,9 +97,13 @@ const SessionRoom = () => {
     }
   };
 
+  const SOCKET_URL =
+  import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+
   const initSocket = () => {
     // Connect to Socket.io server
-    socketRef.current = io('http://localhost:5000', {
+    socketRef.current = io(SOCKET_URL, {
       transports: ['websocket', 'polling'],
       withCredentials: true
     });
@@ -251,37 +255,83 @@ const SessionRoom = () => {
     });
   };
 
-  const initSessionData = async () => {
-    try {
-      // Check if there's an active session
-      const sessionsResponse = await sessionAPI.getSessionsByPair(pairId);
-      const sessions = sessionsResponse.data || [];
+ const initSessionData = async () => {
+  try {
+    // Check if there's an active session
+    const sessionsResponse = await sessionAPI.getSessionsByPair(pairId);
+    const sessions = sessionsResponse.data || [];
+    
+    let activeSession = sessions.find(s => s.status === 'in-progress');
+    
+    if (!activeSession) {
+      // Get pair details to determine skills
+      const pairResponse = await pairAPI.getPair(pairId);
+      const pairDetails = pairResponse.data;
       
-      let activeSession = sessions.find(s => s.status === 'in-progress');
+      const otherUser = getOtherUser();
       
-      if (!activeSession) {
-        // Create a new session
-        const otherUser = getOtherUser();
-        const sessionData = {
-          matchedPairId: pairId,
-          title: `${user.name} & ${otherUser?.name} Session`,
-          description: 'Real-time skill exchange session',
-          scheduledTime: new Date(),
-          duration: 60,
-          teacher: user._id,
-          student: otherUser?._id,
-          status: 'in-progress'
-        };
-        
-        const newSession = await sessionAPI.createSession(sessionData);
-        activeSession = newSession.data;
+      // Determine which skill you're teaching based on the pair
+      let skillTaught = { name: 'General Skills', level: 'intermediate' };
+      let skillLearned = { name: 'General Skills', level: 'beginner' };
+      
+      if (pairDetails.skill1To2 && pairDetails.skill2To1) {
+        if (user._id === pairDetails.user1._id) {
+          skillTaught = pairDetails.skill1To2;
+          skillLearned = pairDetails.skill2To1;
+        } else {
+          skillTaught = pairDetails.skill2To1;
+          skillLearned = pairDetails.skill1To2;
+        }
       }
       
-      setSessionDetails(activeSession);
-    } catch (error) {
-      console.error('Error initializing session data:', error);
+      // Create a new session with skill data
+      const sessionData = {
+        matchedPairId: pairId,
+        title: `${user.name} & ${otherUser?.name} Session`,
+        description: 'Real-time skill exchange session',
+        scheduledTime: new Date(),
+        duration: 60,
+        skillTaught: skillTaught,
+        skillLearned: skillLearned,
+        teacher: user._id,
+        student: otherUser?._id,
+        status: 'in-progress'
+      };
+      
+      console.log('Creating session with data:', sessionData);
+      
+      const newSession = await sessionAPI.createSession(sessionData);
+      activeSession = newSession.data;
     }
-  };
+    
+    setSessionDetails(activeSession);
+  } catch (error) {
+    console.error('Error initializing session data:', error);
+    console.error('Error response:', error.response?.data);
+    
+    // Try creating session without skill data as fallback
+    try {
+      const otherUser = getOtherUser();
+      const sessionData = {
+        matchedPairId: pairId,
+        title: `${user.name} & ${otherUser?.name} Session`,
+        description: 'Real-time skill exchange session',
+        scheduledTime: new Date(),
+        duration: 60,
+        teacher: user._id,
+        student: otherUser?._id,
+        status: 'in-progress'
+      };
+      
+      console.log('Trying fallback session creation:', sessionData);
+      const newSession = await sessionAPI.createSession(sessionData);
+      setSessionDetails(newSession.data);
+    } catch (fallbackError) {
+      console.error('Fallback session creation also failed:', fallbackError);
+      toast.error('Could not create session. Video/audio features may be limited.');
+    }
+  }
+};
 
   const getOtherUser = () => {
     if (!pairDetails || !user) return null;
@@ -368,73 +418,120 @@ const SessionRoom = () => {
     }
   };
 
-  const toggleScreenShare = async () => {
-    if (!isScreenSharing) {
-      try {
-
- if (!navigator.mediaDevices.getDisplayMedia) {
-        toast.error('Screen sharing not supported in this browser');
+ const toggleScreenShare = async () => {
+  if (!isScreenSharing) {
+    try {
+      // Check if browser supports screen sharing
+      if (!navigator.mediaDevices.getDisplayMedia) {
+        toast.error('Screen sharing is not supported in this browser');
         return;
       }
-//
 
-        const screenStream = await navigator.mediaDevices.getDisplayMedia({
-          video: {
-            cursor: "always",
-            frameRate: { ideal: 30 }
-          },
-          audio: false
-        });
+      // Show a toast to guide the user
+      toast('Please select the screen/window you want to share when prompted', {
+        icon: '🖥️',
+        duration: 3000
+      });
 
-        screenStreamRef.current = screenStream;
-        
-        const screenTrack = screenStream.getVideoTracks()[0];
-        
-        const sender = peerRef.current?._pc?.getSenders()?.find(s => s.track?.kind === 'video');
-        
-        if (sender && screenTrack) {
-          sender.replaceTrack(screenTrack);
-          screenTrack.onended = () => toggleScreenShare();
+      const screenStream = await navigator.mediaDevices.getDisplayMedia({
+        video: {
+          cursor: "always",
+          frameRate: { ideal: 30 }
+        },
+        audio: false
+      }).catch(error => {
+        console.error('User denied screen sharing or error:', error);
+        toast.error('Screen sharing was cancelled or not permitted');
+        throw error;
+      });
+
+      screenStreamRef.current = screenStream;
+      
+      const screenTrack = screenStream.getVideoTracks()[0];
+      
+      if (!screenTrack) {
+        toast.error('No screen track available');
+        return;
+      }
+      
+      // Replace video track with screen track
+      const senders = peerRef.current?._pc?.getSenders();
+      if (senders) {
+        const videoSender = senders.find(s => s.track?.kind === 'video');
+        if (videoSender) {
+          videoSender.replaceTrack(screenTrack);
         }
-        
-        if (localVideoRef.current) {
-          localVideoRef.current.srcObject = screenStream;
-        }
-        
-        setIsScreenSharing(true);
+      }
+      
+      if (localVideoRef.current) {
+        localVideoRef.current.srcObject = screenStream;
+      }
+      
+      setIsScreenSharing(true);
+      
+      // Notify others
+      if (socketRef.current) {
         socketRef.current.emit('screen-sharing', {
           roomId: pairId,
           userId: user._id,
           isSharing: true
         });
-      } catch (error) {
-        console.error('Error sharing screen:', error);
-      }
-    } else {
-      if (screenStreamRef.current) {
-        screenStreamRef.current.getTracks().forEach(track => track.stop());
-        screenStreamRef.current = null;
       }
       
-      const videoTrack = localStreamRef.current?.getVideoTracks()[0];
-      const sender = peerRef.current?._pc?.getSenders()?.find(s => s.track?.kind === 'video');
+      toast.success('Screen sharing started');
       
-      if (sender && videoTrack) {
-        sender.replaceTrack(videoTrack);
+      // Handle when user stops sharing via browser UI
+      screenTrack.onended = () => {
+        console.log('Screen sharing ended by browser UI');
+        if (isScreenSharing) {
+          toggleScreenShare();
+        }
+      };
+    } catch (error) {
+      console.error('Error sharing screen:', error);
+      // Don't show error toast if user cancelled
+      if (error.name !== 'NotAllowedError') {
+        toast.error(`Screen sharing failed: ${error.message}`);
       }
-      
-      if (localVideoRef.current) {
-        localVideoRef.current.srcObject = localStreamRef.current;
-      }
-      
       setIsScreenSharing(false);
+    }
+  } else {
+    // Stop screen sharing
+    if (screenStreamRef.current) {
+      screenStreamRef.current.getTracks().forEach(track => track.stop());
+      screenStreamRef.current = null;
+    }
+    
+    // Restore camera video
+    const videoTrack = localStreamRef.current?.getVideoTracks()[0];
+    if (videoTrack) {
+      const senders = peerRef.current?._pc?.getSenders();
+      if (senders) {
+        const videoSender = senders.find(s => s.track?.kind === 'video');
+        if (videoSender) {
+          videoSender.replaceTrack(videoTrack);
+        }
+      }
+    }
+    
+    if (localVideoRef.current) {
+      localVideoRef.current.srcObject = localStreamRef.current;
+    }
+    
+    setIsScreenSharing(false);
+    
+    // Notify others
+    if (socketRef.current) {
       socketRef.current.emit('screen-sharing', {
         roomId: pairId,
         userId: user._id,
         isSharing: false
       });
     }
-  };
+    
+    toast.success('Screen sharing stopped');
+  }
+};
 
   const endSession = async () => {
     if (window.confirm('Are you sure you want to end the session?')) {

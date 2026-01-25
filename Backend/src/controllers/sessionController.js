@@ -1,12 +1,16 @@
 const Session = require('../models/Session');
 const MatchedPair = require('../models/MatchedPair');
 
+
+
 // @desc    Create a session
 // @route   POST /api/sessions
 // @access  Private
 const createSession = async (req, res) => {
   try {
-    const { matchedPairId, title, description, scheduledTime, duration, skillTaught, skillLearned } = req.body;
+    console.log('Creating session with data:', req.body);
+    
+    const { matchedPairId, title, description, scheduledTime, duration, teacher, student, status } = req.body;
 
     const matchedPair = await MatchedPair.findById(matchedPairId);
     if (!matchedPair) {
@@ -19,30 +23,38 @@ const createSession = async (req, res) => {
       return res.status(403).json({ message: 'Not authorized' });
     }
 
-    // Determine teacher and student based on skills
-    let teacher, student;
-    if (matchedPair.skill1To2.name === skillTaught.name) {
-      teacher = matchedPair.user1;
-      student = matchedPair.user2;
+    // Create session with provided data or defaults
+    const sessionData = {
+      matchedPair: matchedPairId,
+      title: title || `${req.user.name}'s Session`,
+      description: description || 'Real-time skill exchange session',
+      scheduledTime: scheduledTime || new Date(),
+      duration: duration || 60,
+      teacher: teacher || req.user._id,
+      student: student || (req.user._id.toString() === matchedPair.user1.toString() ? matchedPair.user2 : matchedPair.user1),
+      status: status || 'scheduled'
+    };
+
+    // Add skills if they exist in the matched pair
+    if (matchedPair.skill1To2 && matchedPair.skill2To1) {
+      if (sessionData.teacher.toString() === matchedPair.user1.toString()) {
+        sessionData.skillTaught = matchedPair.skill1To2 || { name: 'General Skills', level: 'intermediate' };
+        sessionData.skillLearned = matchedPair.skill2To1 || { name: 'General Skills', level: 'beginner' };
+      } else {
+        sessionData.skillTaught = matchedPair.skill2To1 || { name: 'General Skills', level: 'intermediate' };
+        sessionData.skillLearned = matchedPair.skill1To2 || { name: 'General Skills', level: 'beginner' };
+      }
     } else {
-      teacher = matchedPair.user2;
-      student = matchedPair.user1;
+      // Default skills if not specified
+      sessionData.skillTaught = { name: 'General Skills', level: 'intermediate' };
+      sessionData.skillLearned = { name: 'General Skills', level: 'beginner' };
     }
 
-    const session = await Session.create({
-      matchedPair: matchedPairId,
-      title,
-      description,
-      scheduledTime,
-      duration,
-      skillTaught,
-      skillLearned,
-      teacher,
-      student,
-      status: 'scheduled'
-    });
+    const session = await Session.create(sessionData);
 
-    // Update matched pair's next session
+    console.log('Session created successfully:', session._id);
+
+     // Update matched pair's next session
     matchedPair.nextSession = {
       date: scheduledTime,
       duration,
@@ -50,11 +62,25 @@ const createSession = async (req, res) => {
     };
     await matchedPair.save();
 
+
+
     res.status(201).json(session);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Error creating session:', error);
+    console.error('Error stack:', error.stack);
+    res.status(500).json({ 
+      message: 'Error creating session',
+      error: error.message,
+      ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
+    });
   }
 };
+
+
+
+
+
+
 
 // @desc    Get sessions for matched pair
 // @route   GET /api/sessions/pair/:pairId
