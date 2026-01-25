@@ -69,6 +69,11 @@ const SessionRoom = () => {
       
       // 2. Initialize Socket.io connection
       initSocket();
+
+
+        // 3. Wait for socket connection
+    await waitForSocketConnection();
+    console.log('✅ Socket connected');
       
       // 3. Initialize media devices
       await initMedia();
@@ -86,6 +91,30 @@ const SessionRoom = () => {
       setLoading(false);
     }
   };
+
+
+  // Add helper function to wait for socket connection
+const waitForSocketConnection = () => {
+  return new Promise((resolve, reject) => {
+    if (socketRef.current?.connected) {
+      resolve();
+    } else {
+      const timeout = setTimeout(() => {
+        reject(new Error('Socket connection timeout'));
+      }, 10000);
+      
+      socketRef.current?.on('connect', () => {
+        clearTimeout(timeout);
+        resolve();
+      });
+      
+      socketRef.current?.on('connect_error', (error) => {
+        clearTimeout(timeout);
+        reject(error);
+      });
+    }
+  });
+};
 
   const fetchPairDetails = async () => {
     try {
@@ -144,9 +173,12 @@ const initSocket = () => {
   });
 
   socketRef.current.on('user-joined', (userData) => {
-    console.log('👋 User joined:', userData);
-    toast.success(`${userData.userName} joined the session`);
-    
+   console.log('User joined:', userData);
+  toast(`${userData.userName} joined the session`, {
+    icon: '👋',
+    duration: 3000
+  });
+
     // When a user joins, reinitialize WebRTC if not already connected
     if (!peerRef.current) {
       console.log('Reinitializing WebRTC for new user');
@@ -157,8 +189,11 @@ const initSocket = () => {
   });
 
   socketRef.current.on('user-left', (userData) => {
-    console.log('👋 User left:', userData);
-    toast.info(`${userData.userName} left the session`);
+   console.log('User left:', userData);
+  toast(`${userData.userName} left the session`, {
+    icon: '👋',
+    duration: 3000
+  });
     
     // Cleanup peer connection
     if (peerRef.current) {
@@ -649,7 +684,7 @@ const initSocket = () => {
   };
 
 
-  
+
 
 
 
