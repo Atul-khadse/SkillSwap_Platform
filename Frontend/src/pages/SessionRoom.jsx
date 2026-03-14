@@ -117,20 +117,25 @@ const waitForSocketConnection = async () => {
 };
 
   const fetchPairDetails = async () => {
-    try {
-      const response = await pairAPI.getPair(pairId);
-      setPairDetails(response.data);
-    } catch (error) {
-      console.error('Error fetching pair details:', error);
-      toast.error('Failed to load pair details');
-    }
-  };
+  try {
+    const response = await pairAPI.getPair(pairId);
+    setPairDetails(response.data);
+    pairDetailsRef.current = response.data; // store in ref for synchronous access
+  } catch (error) {
+    console.error('Error fetching pair details:', error);
+    toast.error('Failed to load pair details');
+  }
+};
 
 
 // With this:
-const SOCKET_URL = import.meta.env.VITE_API_URL 
-  ? import.meta.env.VITE_API_URL.replace('https://', 'wss://').replace('http://', 'ws://')
-  : 'http://localhost:5000';
+// const SOCKET_URL = import.meta.env.VITE_API_URL 
+//   ? import.meta.env.VITE_API_URL.replace('https://', 'wss://').replace('http://', 'ws://')
+//   : 'http://localhost:5000';
+
+
+const SOCKET_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 
 // Then in initSocket function:
 const initSocket = async () => {
@@ -263,33 +268,19 @@ const initSocket = async () => {
 
 
   const initMedia = async () => {
-    try {
-      // Get user media (video and audio)
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
-          frameRate: { ideal: 30 }
-        },
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true
-        }
-      });
-
-      localStreamRef.current = stream;
-      
-      // Set video element source
-      if (localVideoRef.current) {
-        localVideoRef.current.srcObject = stream;
-        localVideoRef.current.muted = true;
-      }
-    } catch (error) {
-      console.error('Error accessing media devices:', error);
-      toast.error('Could not access camera/microphone. Please check permissions.');
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    localStreamRef.current = stream;
+    if (localVideoRef.current) {
+      localVideoRef.current.srcObject = stream;
+      localVideoRef.current.muted = true;
     }
-  };
+  } catch (error) {
+    console.error('Error accessing media devices:', error);
+    toast.error('Could not access camera/microphone. Please check permissions.');
+    throw error; // rethrow so initSession catches it
+  }
+};
 
   const initWebRTC = async () => {
   try {
@@ -331,6 +322,8 @@ const initSocket = async () => {
       }
     });
 
+    const pairDetailsRef = useRef(null);
+
     // Peer event listeners
     peerRef.current.on('signal', (data) => {
       console.log('WebRTC signaling data (type):', data.type);
@@ -365,6 +358,10 @@ const initSocket = async () => {
       console.log('✅ WebRTC connection established!');
       toast.success('Connected to partner!');
     });
+    
+    peerRef.current.on('iceStateChange', (state) => {
+  console.log('ICE state:', state);
+});
 
     peerRef.current.on('error', (error) => {
       console.error('❌ Peer error:', error);
@@ -460,25 +457,25 @@ const initSocket = async () => {
   }
 };
 
- const getOtherUser = () => {
-  if (!pairDetails || !user) return null;
-  
+const getOtherUser = () => {
+  // Use ref first (synchronous), fallback to state
+  const details = pairDetailsRef.current || pairDetails;
+  if (!details || !user) return null;
+
   console.log('Getting other user from pairDetails:', {
-    pairDetails,
+    details,
     user: user._id,
-    user1: pairDetails.user1?._id || pairDetails.user1,
-    user2: pairDetails.user2?._id || pairDetails.user2
+    user1: details.user1?._id || details.user1,
+    user2: details.user2?._id || details.user2
   });
-  
-  // Handle both populated user object and just user ID
-  const user1Id = pairDetails.user1?._id || pairDetails.user1;
-  const user2Id = pairDetails.user2?._id || pairDetails.user2;
-  
+
+  const user1Id = details.user1?._id || details.user1;
+  const user2Id = details.user2?._id || details.user2;
+
   if (user1Id === user._id) {
-    // Return full user object if populated, otherwise just ID
-    return pairDetails.user2 || { _id: user2Id, name: 'Partner' };
+    return details.user2 || { _id: user2Id, name: 'Partner' };
   } else {
-    return pairDetails.user1 || { _id: user1Id, name: 'Partner' };
+    return details.user1 || { _id: user1Id, name: 'Partner' };
   }
 };
 
