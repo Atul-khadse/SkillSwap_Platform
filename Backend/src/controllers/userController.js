@@ -9,17 +9,37 @@ const getUsers = async (req, res) => {
   try {
     const { skill, level, location, page = 1, limit = 10 } = req.query;
     
-    const query = { _id: { $ne: req.user._id }, isAvailable: true };
+    const query = { _id: { $ne: req.user._id } };
     
-    if (skill) {
-      query.$or = [
-        { 'skillsOffered.name': new RegExp(skill, 'i') },
-        { 'skillsNeeded.name': new RegExp(skill, 'i') }
-      ];
+     // Build an array of conditions for $and
+    let andConditions = [];
+
+   if (skill) {
+      andConditions.push({
+        $or: [
+          { 'skillsOffered.name': new RegExp(skill, 'i') },
+          { 'skillsNeeded.name': new RegExp(skill, 'i') }
+        ]
+      });
     }
     
     if (location) {
-      query.location = new RegExp(location, 'i');
+      andConditions.push({
+        location: new RegExp(location, 'i')
+      });
+    }
+
+    if (level) {
+      andConditions.push({
+        $or: [
+          { 'skillsOffered.level': level },
+          { 'skillsNeeded.level': level }
+        ]
+      });
+    }
+    
+    if (andConditions.length > 0) {
+      query = { ...query, $and: andConditions };
     }
     
     const users = await User.find(query)

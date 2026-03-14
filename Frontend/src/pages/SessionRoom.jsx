@@ -68,7 +68,7 @@ const SessionRoom = () => {
       await fetchPairDetails();
       
       // 2. Initialize Socket.io connection
-      initSocket();
+      await initSocket();
 
 
         // 3. Wait for socket connection
@@ -79,7 +79,7 @@ const SessionRoom = () => {
       await initMedia();
       
       // 4. Initialize WebRTC peer connection
-      initWebRTC();
+       await initWebRTC();
       
       // 5. Create or fetch session
       await initSessionData();
@@ -94,7 +94,7 @@ const SessionRoom = () => {
 
 
   // Add helper function to wait for socket connection
-const waitForSocketConnection = () => {
+const waitForSocketConnection = async () => {
   return new Promise((resolve, reject) => {
     if (socketRef.current?.connected) {
       resolve();
@@ -133,7 +133,8 @@ const SOCKET_URL = import.meta.env.VITE_API_URL
   : 'http://localhost:5000';
 
 // Then in initSocket function:
-const initSocket = () => {
+const initSocket = async () => {
+  return new Promise((resolve, reject) => {
   console.log('🔌 Connecting to Socket.io at:', SOCKET_URL);
   
   socketRef.current = io(SOCKET_URL, {
@@ -155,12 +156,15 @@ const initSocket = () => {
       userId: user._id,
       userName: user.name
     });
+    resolve();
   });
 
   socketRef.current.on('connect_error', (error) => {
     console.error('❌ Socket connection error:', error);
     toast.error('Failed to connect to server. Trying to reconnect...');
+    reject(error);
   });
+
 
   socketRef.current.on('room-users', (users) => {
     console.log('👥 Users in room:', users);
@@ -250,6 +254,7 @@ const initSocket = () => {
   socketRef.current.on('error', (error) => {
     console.error('⚠️ Socket error:', error);
   });
+  });
 };
 
 
@@ -286,7 +291,7 @@ const initSocket = () => {
     }
   };
 
-  const initWebRTC = () => {
+  const initWebRTC = async () => {
   try {
     console.log('Initializing WebRTC with user:', user._id);
     
@@ -299,6 +304,10 @@ const initSocket = () => {
     // Determine who should be initiator based on user ID (so both don't try to initiate)
     // User with lower ID becomes initiator
     const otherUser = getOtherUser();
+    if (!otherUser || !otherUser._id) {
+    console.error('Could not determine other user');
+    return;
+  }
     const otherUserId = otherUser?._id;
     const isInitiator = user._id < otherUserId;
     

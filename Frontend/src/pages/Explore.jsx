@@ -26,122 +26,85 @@ const Explore = () => {
     skillRequested: '',
     message: '',
   });
+  // Pagination state
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [limit] = useState(10); // items per page
+
   const { user: currentUser } = useAuth();
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [page]); // refetch when page changes
 
- const fetchUsers = async () => {
-  try {
-    setLoading(true);
-    
-    // Fetch real users from your API
-    const response = await userAPI.getPotentialMatches();
-    const users = response.data || [];
-    
-    setUsers(users);
-  } catch (error) {
-    console.error('Error fetching users:', error);
-    toast.error('Failed to load users');
-    
-    // Fallback to empty array if API fails
-    setUsers([]);
-  } finally {
-    setLoading(false);
-  }
-};
-
-  const handleSearch = async () => {
+  const fetchUsers = async () => {
     try {
       setLoading(true);
-      
-      // Filter mock users based on search criteria
-      const filtered = users.filter(user => {
-        // Filter by skill
-        if (filters.skill) {
-          const hasSkill = user.skillsOffered?.some(s => 
-            s.name.toLowerCase().includes(filters.skill.toLowerCase())
-          ) || user.skillsNeeded?.some(s => 
-            s.name.toLowerCase().includes(filters.skill.toLowerCase())
-          );
-          if (!hasSkill) return false;
-        }
-
-        // Filter by location
-        if (filters.location) {
-          if (!user.location.toLowerCase().includes(filters.location.toLowerCase())) {
-            return false;
-          }
-        }
-
-        // Filter by skill level
-        if (filters.level) {
-          const hasLevel = user.skillsOffered?.some(s => 
-            s.level === filters.level
-          ) || user.skillsNeeded?.some(s => 
-            s.level === filters.level
-          );
-          if (!hasLevel) return false;
-        }
-
-        return true;
+      // Pass filters and pagination to the backend
+      const response = await userAPI.getUsers({
+        ...filters,
+        page,
+        limit,
       });
-
-      setUsers(filtered);
       
-      if (filtered.length === 0) {
-        toast.error('No users found matching your criteria');
-      }
+      // The backend returns: { users, page, pages, total }
+      const { users: usersArray, pages } = response.data;
+      setUsers(usersArray || []);
+      setTotalPages(pages || 1);
     } catch (error) {
-      toast.error('Search failed');
+      console.error('Error fetching users:', error);
+      toast.error('Failed to load users');
+      setUsers([]);
     } finally {
       setLoading(false);
     }
   };
 
- const handleSendRequest = async () => {
-  try {
-    if (!selectedUser?._id) {
-      toast.error('Invalid user selected');
-      return;
-    }
+  const handleSearch = (e) => {
+    e.preventDefault();
+    setPage(1); // reset to first page on new search
+    fetchUsers();
+  };
 
-    // Prepare request data
-    const requestPayload = {
-      recipientId: selectedUser._id,
-      skillOffered: {
-        name: requestData.skillOffered,
-        level: 'intermediate' // You might want to get this from user's skills
-      },
-      skillRequested: {
-        name: requestData.skillRequested,
-        level: 'beginner' // You might want to get this from selected user's skills
-      },
-      message: requestData.message,
-    };
+  const resetFilters = () => {
+    setFilters({ skill: '', location: '', level: '' });
+    setPage(1);
+    fetchUsers();
+  };
 
-    // Send real request
-    const response = await exchangeAPI.sendRequest(requestPayload);
-    
-    if (response.data) {
-      toast.success('Exchange request sent successfully!');
-      setShowRequestModal(false);
-      setSelectedUser(null);
-      setRequestData({
-        skillOffered: '',
-        skillRequested: '',
-        message: '',
-      });
+  const handleSendRequest = async () => {
+    try {
+      if (!selectedUser?._id) {
+        toast.error('Invalid user selected');
+        return;
+      }
+
+      const requestPayload = {
+        recipientId: selectedUser._id,
+        skillOffered: {
+          name: requestData.skillOffered,
+          level: 'intermediate' // You can map from current user's actual skill level
+        },
+        skillRequested: {
+          name: requestData.skillRequested,
+          level: 'beginner' // You can map from selected user's actual skill level
+        },
+        message: requestData.message,
+      };
+
+      const response = await exchangeAPI.sendRequest(requestPayload);
       
-      // Refresh the user list
-      fetchUsers();
+      if (response.data) {
+        toast.success('Exchange request sent successfully!');
+        setShowRequestModal(false);
+        setSelectedUser(null);
+        setRequestData({ skillOffered: '', skillRequested: '', message: '' });
+      }
+    } catch (error) {
+      console.error('Error sending request:', error);
+      toast.error(error.response?.data?.message || 'Failed to send request');
     }
-  } catch (error) {
-    console.error('Error sending request:', error);
-    toast.error(error.response?.data?.message || 'Failed to send request');
-  }
-};
+  };
 
   const skillLevels = ['beginner', 'intermediate', 'advanced', 'expert'];
 
@@ -163,7 +126,7 @@ const Explore = () => {
       </div>
 
       {/* Search and Filters */}
-      <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
+      <form onSubmit={handleSearch} className="bg-white rounded-xl shadow-sm p-6 mb-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -214,7 +177,7 @@ const Explore = () => {
           </div>
           <div className="flex items-end">
             <button
-              onClick={handleSearch}
+              type="submit"
               className="w-full hover:cursor-pointer bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition font-medium flex items-center justify-center"
             >
               <Filter className="h-5 w-5 mr-2" />
@@ -226,16 +189,14 @@ const Explore = () => {
         {/* Reset filter button */}
         <div className="mt-4">
           <button
-            onClick={() => {
-              setFilters({ skill: '', location: '', level: '' });
-              fetchUsers();
-            }}
+            type="button"
+            onClick={resetFilters}
             className="text-sm text-blue-600 hover:text-blue-700"
           >
             Reset all filters
           </button>
         </div>
-      </div>
+      </form>
 
       {/* Users Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -346,7 +307,30 @@ const Explore = () => {
         )}
       </div>
 
-      {/* Request Modal */}
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex justify-center mt-8 space-x-2">
+          <button
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page === 1}
+            className="px-4 py-2 border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+          >
+            Previous
+          </button>
+          <span className="px-4 py-2">
+            Page {page} of {totalPages}
+          </span>
+          <button
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={page === totalPages}
+            className="px-4 py-2 border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+          >
+            Next
+          </button>
+        </div>
+      )}
+
+      {/* Request Modal (unchanged) */}
       {showRequestModal && selectedUser && (
         <div className="fixed inset-0 bg-blue-50 bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl shadow-lg max-w-md w-full p-6">
