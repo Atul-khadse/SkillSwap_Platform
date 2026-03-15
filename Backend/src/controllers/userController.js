@@ -9,7 +9,7 @@ const getUsers = async (req, res) => {
   try {
     const { skill, level, location, page = 1, limit = 10 } = req.query;
     
-    const query = { _id: { $ne: req.user._id } };
+    let query = { _id: { $ne: req.user._id } };
     
      // Build an array of conditions for $and
     let andConditions = [];
