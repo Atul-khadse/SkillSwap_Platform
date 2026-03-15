@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
-import { User, Mail, Lock, Eye, EyeOff, GraduationCap } from 'lucide-react';
+import { User, Mail, Lock, Eye, EyeOff, GraduationCap, ArrowRight, Sparkles, X, Plus } from 'lucide-react';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -60,16 +60,14 @@ const Register = () => {
       };
 
       console.log('Sending registration data:', userData);
-
       const result = await register(userData);
-
-       console.log('Registration response:', result);
+      console.log('Registration response:', result);
+      
       if (result.success) {
         navigate('/dashboard');
       }
     } catch (error) {
-       console.error('Registration error:', error);
-    console.error('Error response:', error.response?.data);
+      console.error('Registration error:', error);
       toast.error('Registration failed. Please try again.');
     } finally {
       setLoading(false);
@@ -77,262 +75,200 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-2xl w-full space-y-8 bg-white p-8 rounded-2xl shadow-lg">
-        <div>
-          <div className="flex justify-center">
-            <div className="h-12 w-12 bg-primary-600 rounded-lg flex items-center justify-center">
-              <span className="text-white text-xl font-bold">SS</span>
-            </div>
+    <div className="min-h-screen relative flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-slate-50 overflow-hidden">
+      {/* High-Visibility Dot Pattern */}
+      <div className="absolute inset-0 z-0 opacity-100" 
+           style={{ 
+             backgroundImage: `radial-gradient(#cbd5e1 1.5px, transparent 1.5px)`, 
+             backgroundSize: '24px 24px' 
+           }}>
+      </div>
+      
+      {/* Animated Gradient Blobs */}
+      <div className="absolute top-[-5%] right-[-5%] w-[35%] h-[35%] bg-cyan-200/40 rounded-full blur-[100px] animate-pulse"></div>
+      <div className="absolute bottom-[-5%] left-[-5%] w-[35%] h-[35%] bg-teal-200/40 rounded-full blur-[100px] animate-pulse delay-700"></div>
+
+      <div className="max-w-2xl w-full z-10 animate-in fade-in zoom-in duration-700">
+        {/* Header */}
+        <div className="flex flex-col items-center mb-8 text-center">
+          <div className="h-16 w-16 bg-gradient-to-tr from-[#1B6F81] to-[#3ec5f1] rounded-2xl flex items-center justify-center shadow-2xl shadow-cyan-200 mb-4 rotate-3">
+            <Sparkles className="text-white h-8 w-8" />
           </div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Create your account
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Or{' '}
-            <Link to="/login" className="font-medium text-primary-600 hover:text-primary-500">
-              sign in to your existing account
-            </Link>
+          <h2 className="text-4xl font-black text-slate-900 tracking-tight">Create your account</h2>
+          <p className="mt-2 text-slate-500 font-medium">
+            Join the community or{' '}
+            <Link to="/login" className="text-[#1B6F81] hover:underline decoration-2 font-bold">sign in here</Link>
           </p>
         </div>
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                Full Name
-              </label>
-              <div className="mt-1 relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <User className="h-5 w-5 text-gray-400" />
+        {/* Form Card */}
+        <div className="bg-white/90 backdrop-blur-md p-8 sm:p-10 rounded-[2.5rem] shadow-[0_32px_64px_-15px_rgba(0,0,0,0.1)] border border-white">
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {/* Full Name */}
+              <div className="space-y-1">
+                <label className="text-sm font-bold text-slate-700 ml-1">Full Name</label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <User className="h-5 w-5 text-slate-400 group-focus-within:text-[#1B6F81] transition-colors" />
+                  </div>
+                  <input
+                    name="name"
+                    type="text"
+                    required
+                    value={formData.name}
+                    onChange={handleChange}
+                    className="block w-full pl-11 pr-4 py-3 bg-slate-50/50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-[#3ec5f1]/10 focus:border-[#3ec5f1] outline-none transition-all"
+                    placeholder="John Doe"
+                  />
                 </div>
-                <input
-                  id="name"
-                  name="name"
-                  type="text"
-                  autoComplete="name"
-                  required
-                  value={formData.name}
-                  onChange={handleChange}
-                  className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  placeholder="John Doe"
-                />
               </div>
-            </div>
 
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email address
-              </label>
-              <div className="mt-1 relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-gray-400" />
+              {/* Email */}
+              <div className="space-y-1">
+                <label className="text-sm font-bold text-slate-700 ml-1">Email Address</label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <Mail className="h-5 w-5 text-slate-400 group-focus-within:text-[#1B6F81] transition-colors" />
+                  </div>
+                  <input
+                    name="email"
+                    type="email"
+                    required
+                    value={formData.email}
+                    onChange={handleChange}
+                    className="block w-full pl-11 pr-4 py-3 bg-slate-50/50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-[#3ec5f1]/10 focus:border-[#3ec5f1] outline-none transition-all"
+                    placeholder="john@example.com"
+                  />
                 </div>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  placeholder="you@example.com"
-                />
               </div>
-            </div>
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Password
-              </label>
-              <div className="mt-1 relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  autoComplete="new-password"
-                  required
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="appearance-none block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  placeholder="••••••••"
-                />
-                <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="text-gray-400 hover:text-gray-500 focus:outline-none"
-                  >
-                    {showPassword ? (
-                      <EyeOff className="h-5 w-5" />
-                    ) : (
-                      <Eye className="h-5 w-5" />
-                    )}
+              {/* Password */}
+              <div className="space-y-1">
+                <label className="text-sm font-bold text-slate-700 ml-1">Password</label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <Lock className="h-5 w-5 text-slate-400 group-focus-within:text-[#1B6F81] transition-colors" />
+                  </div>
+                  <input
+                    name="password"
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    value={formData.password}
+                    onChange={handleChange}
+                    className="block w-full pl-11 pr-12 py-3 bg-slate-50/50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-[#3ec5f1]/10 focus:border-[#3ec5f1] outline-none transition-all"
+                    placeholder="••••••••"
+                  />
+                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400">
+                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                   </button>
                 </div>
               </div>
-              <p className="mt-1 text-xs text-gray-500">
-                Must be at least 6 characters
-              </p>
-            </div>
 
-            <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-                Confirm Password
-              </label>
-              <div className="mt-1 relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  autoComplete="new-password"
-                  required
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  className="appearance-none block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  placeholder="••••••••"
-                />
-                <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="text-gray-400 hover:text-gray-500 focus:outline-none"
-                  >
-                    {showConfirmPassword ? (
-                      <EyeOff className="h-5 w-5" />
-                    ) : (
-                      <Eye className="h-5 w-5" />
-                    )}
+              {/* Confirm Password */}
+              <div className="space-y-1">
+                <label className="text-sm font-bold text-slate-700 ml-1">Confirm Password</label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <Lock className="h-5 w-5 text-slate-400 group-focus-within:text-[#1B6F81] transition-colors" />
+                  </div>
+                  <input
+                    name="confirmPassword"
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    required
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    className="block w-full pl-11 pr-12 py-3 bg-slate-50/50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-[#3ec5f1]/10 focus:border-[#3ec5f1] outline-none transition-all"
+                    placeholder="••••••••"
+                  />
+                  <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400">
+                    {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                   </button>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Skills You Can Teach
-            </label>
-            <div className="flex">
-              <div className="flex-1 relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <GraduationCap className="h-5 w-5 text-gray-400" />
+            {/* Skills Section */}
+            <div className="space-y-3">
+              <label className="text-sm font-bold text-slate-700 ml-1">Skills You Can Teach</label>
+              <div className="flex gap-2">
+                <div className="relative flex-1 group">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <GraduationCap className="h-5 w-5 text-slate-400 group-focus-within:text-[#1B6F81]" />
+                  </div>
+                  <input
+                    type="text"
+                    value={currentSkill}
+                    onChange={(e) => setCurrentSkill(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddSkill())}
+                    placeholder="e.g., React, UI Design..."
+                    className="block w-full pl-11 pr-4 py-3 bg-slate-50/50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-[#3ec5f1]/10 focus:border-[#3ec5f1] outline-none transition-all"
+                  />
                 </div>
-                <input
-                  type="text"
-                  value={currentSkill}
-                  onChange={(e) => setCurrentSkill(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddSkill())}
-                  placeholder="e.g., React, Cooking, Spanish..."
-                  className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-l-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                />
+                <button
+                  type="button"
+                  onClick={handleAddSkill}
+                  className="bg-[#1B6F81] text-white p-3 rounded-2xl hover:bg-slate-900 transition-colors shadow-lg shadow-cyan-100"
+                >
+                  <Plus className="h-6 w-6" />
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={handleAddSkill}
-                className="bg-primary-600 text-white px-4 py-2 rounded-r-lg hover:bg-primary-700 transition"
-              >
-                Add
-              </button>
-            </div>
-            <p className="mt-1 text-xs text-gray-500">
-              Add skills you're comfortable teaching to others
-            </p>
 
-            {skills.length > 0 && (
-              <div className="mt-3 flex flex-wrap gap-2">
+              {/* Skill Tags */}
+              <div className="flex flex-wrap gap-2 min-h-[40px]">
                 {skills.map((skill, index) => (
-                  <span
-                    key={index}
-                    className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-primary-100 text-primary-800"
-                  >
+                  <span key={index} className="inline-flex items-center px-4 py-1.5 rounded-xl text-sm font-bold bg-[#3ec5f1]/10 text-[#1B6F81] border border-[#3ec5f1]/20 animate-in zoom-in duration-300">
                     {skill}
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveSkill(skill)}
-                      className="ml-2 text-primary-600 hover:text-primary-800"
-                    >
-                      ×
+                    <button type="button" onClick={() => handleRemoveSkill(skill)} className="ml-2 hover:text-red-500 transition-colors">
+                      <X className="h-4 w-4" />
                     </button>
                   </span>
                 ))}
               </div>
-            )}
-          </div>
+            </div>
 
-          <div className="flex items-center">
-            <input
-              id="terms"
-              name="terms"
-              type="checkbox"
-              required
-              className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
-            />
-            <label htmlFor="terms" className="ml-2 block text-sm text-gray-900">
-              I agree to the{' '}
-              <Link to="/terms" className="text-primary-600 hover:text-primary-500">
-                Terms of Service
-              </Link>{' '}
-              and{' '}
-              <Link to="/privacy" className="text-primary-600 hover:text-primary-500">
-                Privacy Policy
-              </Link>
-            </label>
-          </div>
+            {/* Terms */}
+            <div className="flex items-start px-1">
+              <input id="terms" type="checkbox" required className="mt-1 h-4 w-4 text-[#1B6F81] border-slate-300 rounded cursor-pointer" />
+              <label htmlFor="terms" className="ml-3 text-sm text-slate-600 leading-tight">
+                I agree to the <Link to="/terms" className="text-[#1B6F81] font-bold">Terms</Link> and <Link to="/privacy" className="text-[#1B6F81] font-bold">Privacy Policy</Link>
+              </label>
+            </div>
 
-          <div>
+            {/* Submit Button */}
             <button
               type="submit"
               disabled={loading}
-              className="group relative w-full flex justify-center py-3 px-4 text-sm font-medium rounded-lg border-2 border-gray-300 text-gray-700  hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500   transition"
+              className="w-full flex items-center justify-center py-4 px-4 rounded-2xl text-white bg-slate-900 hover:bg-[#1B6F81] font-bold shadow-xl shadow-slate-200 transition-all active:scale-[0.98] disabled:opacity-70 group"
             >
               {loading ? (
-                <div className="flex items-center ">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2  border-white mr-2"></div>
-                  Creating account...
+                <div className="flex items-center">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
+                  Building Profile...
                 </div>
               ) : (
-                'Create Account'
+                <>
+                  Create Account
+                  <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                </>
               )}
             </button>
-          </div>
-        </form>
+          </form>
 
-        <div className="mt-6">
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300"></div>
+          {/* Social Sign Up */}
+          <div className="mt-8">
+            <div className="relative mb-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-slate-100"></div>
+              </div>
+              <div className="relative flex justify-center text-[10px] uppercase tracking-[0.2em] font-black text-slate-400">
+                <span className="px-4 bg-white">Fast Track Registration</span>
+              </div>
             </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">Or sign up with</span>
-            </div>
-          </div>
-
-          <div className="mt-6 grid grid-cols-2 gap-3">
-            <button
-              type="button"
-              className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-            >
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                <path fillRule="evenodd" d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z" clipRule="evenodd" />
-              </svg>
-              <span className="ml-2">GitHub</span>
-            </button>
-            <button
-              type="button"
-              className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-            >
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                <path fillRule="evenodd" d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z" clipRule="evenodd" />
-              </svg>
-              <span className="ml-2">Google</span>
+            <button className="w-full flex items-center justify-center space-x-3 py-3.5 px-4 border-2 border-slate-100 rounded-2xl hover:bg-slate-50 hover:border-slate-200 transition-all font-bold text-slate-700 active:scale-[0.98]">
+              <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" className="h-6 w-6" alt="Google" />
+              <span>Sign up with Google</span>
             </button>
           </div>
         </div>

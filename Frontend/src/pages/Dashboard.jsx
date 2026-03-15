@@ -261,11 +261,11 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Link
             to="/explore"
-            className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition flex items-center justify-between"
+            className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md hover:bg-[#3ec5f1]/10  duration-300 transition flex items-center justify-between"
           >
             <div className="flex items-center">
               <div className="h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
-                <Users className="h-5 w-5 text-blue-600" />
+                <Users className="h-5 w-5 text-[#3ec5f1]" />
               </div>
               <span className="font-medium text-gray-900">Find Partners</span>
             </div>
@@ -273,11 +273,11 @@ const Dashboard = () => {
           </Link>
           <Link
             to="/profile"
-            className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition flex items-center justify-between"
+            className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md hover:bg-[#3ec5f1]/10 duration-300 transition flex items-center justify-between"
           >
             <div className="flex items-center">
-              <div className="h-10 w-10 bg-green-100 rounded-lg flex items-center justify-center mr-4">
-                <GraduationCap className="h-5 w-5 text-green-600" />
+              <div className="h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+                <GraduationCap className="h-5 w-5 text-[#3ec5f1]" />
               </div>
               <span className="font-medium text-gray-900">Update Skills</span>
             </div>
@@ -285,11 +285,11 @@ const Dashboard = () => {
           </Link>
           <Link
             to="/requests"
-            className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition flex items-center justify-between"
+            className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md hover:bg-[#3ec5f1]/10 duration-300 transition flex items-center justify-between"
           >
             <div className="flex items-center">
-              <div className="h-10 w-10 bg-yellow-100 rounded-lg flex items-center justify-center mr-4">
-                <MessageCircle className="h-5 w-5 text-yellow-600" />
+              <div className="h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+                <MessageCircle className="h-5 w-5 text-[#3ec5f1]" />
               </div>
               <span className="font-medium text-gray-900">View Requests</span>
             </div>

@@ -111,7 +111,7 @@ const Explore = () => {
   if (loading && users.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#3ec5f1]"></div>
       </div>
     );
   }
@@ -138,7 +138,7 @@ const Explore = () => {
                 value={filters.skill}
                 onChange={(e) => setFilters({ ...filters, skill: e.target.value })}
                 placeholder="Search skills..."
-                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3ec5f1] focus:border-transparent"
               />
               <Search className="h-5 w-5 text-gray-400 absolute left-3 top-2.5" />
             </div>
@@ -153,7 +153,7 @@ const Explore = () => {
                 value={filters.location}
                 onChange={(e) => setFilters({ ...filters, location: e.target.value })}
                 placeholder="City, Country"
-                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3ec5f1] focus:border-transparent"
               />
               <MapPin className="h-5 w-5 text-gray-400 absolute left-3 top-2.5" />
             </div>
@@ -165,7 +165,7 @@ const Explore = () => {
             <select
               value={filters.level}
               onChange={(e) => setFilters({ ...filters, level: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#3ec5f1] focus:border-transparent"
             >
               <option value="">All Levels</option>
               {skillLevels.map((level) => (
@@ -178,7 +178,7 @@ const Explore = () => {
           <div className="flex items-end">
             <button
               type="submit"
-              className="w-full hover:cursor-pointer bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition font-medium flex items-center justify-center"
+              className="w-full hover:cursor-pointer bg-[#3ec5f1] text-white px-4 py-2 rounded-lg hover:bg-[#2b9ae4] transition font-medium flex items-center justify-center"
             >
               <Filter className="h-5 w-5 mr-2" />
               Search
@@ -191,7 +191,7 @@ const Explore = () => {
           <button
             type="button"
             onClick={resetFilters}
-            className="text-sm text-blue-600 hover:text-blue-700"
+            className="text-sm text-[#3ec5f1] hover:text-[#2b9ae4]"
           >
             Reset all filters
           </button>
@@ -286,18 +286,13 @@ const Explore = () => {
               </div>
 
               <div className="bg-gray-50 px-6 py-4">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm text-gray-600">Match Score</span>
-                  <span className="font-semibold text-blue-600">
-                    {user.matchScore || 0}/100
-                  </span>
-                </div>
+              
                 <button
                   onClick={() => {
                     setSelectedUser(user);
                     setShowRequestModal(true);
                   }}
-                  className="w-full hover:cursor-pointer bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition font-medium"
+                  className="w-full hover:cursor-pointer bg-[#3ec5f1] text-white py-2 rounded-lg hover:bg-[#2b9ae4] transition font-medium"
                 >
                   Send Exchange Request
                 </button>
