@@ -45,6 +45,13 @@ const Profile = () => {
     }
   }, [user]);
 
+  useEffect(() => {
+  if (user) {
+    // Optionally refetch to get latest data
+    authAPI.getProfile().then(res => setUserData(res.data));
+  }
+}, []);
+
   const handleInputChange = (e) => {
     setFormData({
       ...formData,

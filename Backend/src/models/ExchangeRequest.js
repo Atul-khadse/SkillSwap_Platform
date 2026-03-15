@@ -12,12 +12,12 @@ const exchangeRequestSchema = new mongoose.Schema({
     required: true
   },
   skillOffered: {
-    name: String,
-    level: String
+    name: { type: String, required: true },
+    level: { type: String, enum: ['beginner','intermediate','advanced','expert']}
   },
   skillRequested: {
-    name: String,
-    level: String
+    name: { type: String, required: true },
+    level: { type: String, enum: ['beginner','intermediate','advanced','expert']}
   },
   message: {
     type: String,

@@ -114,7 +114,7 @@ const Dashboard = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#3ec5f1]"></div>
       </div>
     );
   }
@@ -137,7 +137,7 @@ const Dashboard = () => {
           <Link
             key={index}
             to={stat.link}
-            className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow"
+            className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow"
           >
             <div className="flex items-center justify-between">
               <div>
@@ -148,7 +148,7 @@ const Dashboard = () => {
                 <stat.icon className="h-6 w-6 text-white" />
               </div>
             </div>
-            <div className="flex items-center text-blue-600 mt-4 text-sm">
+            <div className="flex items-center text-[#3ec5f1] hover:text-[#066b86] mt-4 text-sm">
               <span>View details</span>
               <ArrowRight className="h-4 w-4 ml-1" />
             </div>
@@ -158,22 +158,30 @@ const Dashboard = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Recent Requests */}
-        <div className="bg-white rounded-xl shadow-sm p-6">
+        <div className=" rounded-xl bg-gradient-to-r from-blue-50 to-purple-50 shadow-sm p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold text-gray-900">Recent Requests</h2>
             <Link
               to="/requests"
-              className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+              className="text-[#3ec5f1] hover:text-[#066b86] text-sm font-medium"
             >
               View all
             </Link>
           </div>
-          <div className="space-y-4">
-            {recentRequests.length > 0 ? (
+          <div className=" space-y-4 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+            
+             <style>
+      {`
+        .overflow-y-auto::-webkit-scrollbar {
+          display: none;
+        }
+      `}
+    </style>
+    {recentRequests.length > 0 ? (
               recentRequests.map((request) => (
                 <div
                   key={request._id}
-                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+                  className="flex items-center justify-between p-4 hover:bg-gray-300 bg-[#3ec5f1]/10 duration-300 transition rounded-lg"
                 >
                   <div className="flex items-center">
                     <div className="h-10 w-10 bg-gray-200 rounded-full flex items-center justify-center">
@@ -210,24 +218,31 @@ const Dashboard = () => {
         </div>
 
         {/* Upcoming Sessions */}
-        <div className="bg-white rounded-xl shadow-sm p-6">
+        <div className=" bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl shadow-sm p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold text-gray-900">Upcoming Sessions</h2>
             <Link
               to="/pairs"
-              className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+              className="text-[#3ec5f1] hover:text-[#066b86] text-sm font-medium"
             >
               View all
             </Link>
           </div>
-          <div className="space-y-4">
-            {upcomingSessions.length > 0 ? (
+          <div className=" space-y-4 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+             <style>
+      {`
+        .overflow-y-auto::-webkit-scrollbar {
+          display: none;
+        }
+      `}
+    </style>
+             {upcomingSessions.length > 0 ? (
               upcomingSessions.map((session) => {
                 const otherUser = getOtherUser(session);
                 return (
                   <div
                     key={session._id}
-                    className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition"
+                    className="p-4  rounded-lg hover:bg-gray-300 bg-[#3ec5f1]/10 duration-300 transition"
                   >
                     <div className="flex items-center justify-between">
                       <div>

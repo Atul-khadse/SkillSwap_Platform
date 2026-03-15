@@ -19,6 +19,26 @@ const Register = () => {
   const { register } = useAuth();
   const navigate = useNavigate();
 
+
+
+  // Add these two new state variables near the top (after skills state)
+const [skillsNeeded, setSkillsNeeded] = useState([]);
+const [currentSkillNeeded, setCurrentSkillNeeded] = useState('');
+
+// Add handlers (similar to skillsOffered)
+const handleAddSkillNeeded = () => {
+  if (currentSkillNeeded.trim() && !skillsNeeded.includes(currentSkillNeeded.trim())) {
+    setSkillsNeeded([...skillsNeeded, currentSkillNeeded.trim()]);
+    setCurrentSkillNeeded('');
+  }
+};
+
+const handleRemoveSkillNeeded = (skill) => {
+  setSkillsNeeded(skillsNeeded.filter(s => s !== skill));
+};
+
+
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -56,7 +76,7 @@ const Register = () => {
       const userData = {
         ...formData,
         skillsOffered: skills.map(skill => ({ name: skill, level: 'intermediate' })),
-        skillsNeeded: [{ name: 'JavaScript', level: 'beginner' }], // Default
+        skillsNeeded: skillsNeeded.map(skill => ({ name: skill, level: 'beginner' })), 
       };
 
       console.log('Sending registration data:', userData);
@@ -227,6 +247,47 @@ const Register = () => {
                 ))}
               </div>
             </div>
+
+
+
+            {/* Skills You Want to Learn */}
+<div className="space-y-3 mt-4">
+  <label className="text-sm font-bold text-slate-700 ml-1">Skills You Want to Learn</label>
+  <div className="flex gap-2">
+    <div className="relative flex-1 group">
+      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+        <GraduationCap className="h-5 w-5 text-slate-400 group-focus-within:text-[#1B6F81]" />
+      </div>
+      <input
+        type="text"
+        value={currentSkillNeeded}
+        onChange={(e) => setCurrentSkillNeeded(e.target.value)}
+        onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddSkillNeeded())}
+        placeholder="e.g., Python, UX Design..."
+        className="block w-full pl-11 pr-4 py-3 bg-slate-50/50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-[#3ec5f1]/10 focus:border-[#3ec5f1] outline-none transition-all"
+      />
+    </div>
+    <button
+      type="button"
+      onClick={handleAddSkillNeeded}
+      className="bg-[#1B6F81] text-white p-3 rounded-2xl hover:bg-slate-900 transition-colors shadow-lg shadow-cyan-100"
+    >
+      <Plus className="h-6 w-6" />
+    </button>
+  </div>
+
+  {/* Skill tags for needed skills */}
+  <div className="flex flex-wrap gap-2 min-h-[40px]">
+    {skillsNeeded.map((skill, index) => (
+      <span key={index} className="inline-flex items-center px-4 py-1.5 rounded-xl text-sm font-bold bg-blue-100 text-blue-800 border border-blue-200 animate-in zoom-in duration-300">
+        {skill}
+        <button type="button" onClick={() => handleRemoveSkillNeeded(skill)} className="ml-2 hover:text-red-500 transition-colors">
+          <X className="h-4 w-4" />
+        </button>
+      </span>
+    ))}
+  </div>
+</div>
 
             {/* Terms */}
             <div className="flex items-start px-1">

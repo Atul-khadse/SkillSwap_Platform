@@ -328,6 +328,7 @@ const Explore = () => {
       {/* Request Modal (unchanged) */}
       {showRequestModal && selectedUser && (
         <div className="fixed inset-0 bg-blue-50 bg-opacity-50 flex items-center justify-center p-4 z-50">
+          
           <div className="bg-white rounded-xl shadow-lg max-w-md w-full p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
               Send Exchange Request to {selectedUser.name}
@@ -396,7 +397,7 @@ const Explore = () => {
               </button>
               <button
                 onClick={handleSendRequest}
-                className="px-4 py-2 bg-blue-600 hover:cursor-pointer text-white rounded-lg hover:bg-blue-700 transition"
+                className="px-4 py-2 bg-[#1199c7] hover:cursor-pointer text-white rounded-lg hover:bg-[#81d9f1] transition"
                 disabled={!requestData.skillOffered || !requestData.skillRequested}
               >
                 Send Request

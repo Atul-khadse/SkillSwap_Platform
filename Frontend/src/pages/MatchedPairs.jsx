@@ -103,33 +103,54 @@ const MatchedPairs = () => {
   };
 
   const getSkillTaughtByCurrentUser = (pair) => {
-    if (!user || !pair) return { name: '', level: '' };
-    
-    // Determine which skill the current user is teaching
-    if (pair.user1 && pair.user1._id === user._id) {
-      return pair.skill1To2 || { name: '', level: '' };
-    } else if (pair.user2 && pair.user2._id === user._id) {
-      return pair.skill2To1 || { name: '', level: '' };
-    }
-    return { name: '', level: '' };
-  };
+  if (!user || !pair) return { name: 'Unknown', level: '' };
+  
+  let skill;
+  if (pair.user1 && pair.user1._id === user._id) {
+    skill = pair.skill1To2;
+  } else if (pair.user2 && pair.user2._id === user._id) {
+    skill = pair.skill2To1;
+  } else {
+    return { name: 'Unknown', level: '' };
+  }
 
-  const getSkillLearnedByCurrentUser = (pair) => {
-    if (!user || !pair) return { name: '', level: '' };
-    
-    // Determine which skill the current user is learning
-    if (pair.user1 && pair.user1._id === user._id) {
-      return pair.skill2To1 || { name: '', level: '' };
-    } else if (pair.user2 && pair.user2._id === user._id) {
-      return pair.skill1To2 || { name: '', level: '' };
-    }
-    return { name: '', level: '' };
+  // Handle if skill is a string (fallback) or missing
+  if (!skill) return { name: 'Not specified', level: '' };
+  if (typeof skill === 'string') {
+    return { name: skill, level: '' };
+  }
+  return {
+    name: skill.name || 'Unnamed',
+    level: skill.level || ''
   };
+};
+
+const getSkillLearnedByCurrentUser = (pair) => {
+  if (!user || !pair) return { name: 'Unknown', level: '' };
+  
+  let skill;
+  if (pair.user1 && pair.user1._id === user._id) {
+    skill = pair.skill2To1;
+  } else if (pair.user2 && pair.user2._id === user._id) {
+    skill = pair.skill1To2;
+  } else {
+    return { name: 'Unknown', level: '' };
+  }
+
+  if (!skill) return { name: 'Not specified', level: '' };
+  if (typeof skill === 'string') {
+    return { name: skill, level: '' };
+  }
+  return {
+    name: skill.name || 'Unnamed',
+    level: skill.level || ''
+  };
+};
 
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#3ec5f1]"></div>
       </div>
     );
   }
@@ -288,118 +309,146 @@ const MatchedPairs = () => {
         </div>
       )}
 
-      {/* Create Session Modal */}
-      {showCreateSession && selectedPair && (
-        <div className="fixed inset-0 bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-cyan-500  rounded-xl shadow-lg max-w-md w-full p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+     {/* Create Session Modal */}
+{showCreateSession && selectedPair && (
+  <div className="fixed inset-0 flex items-center justify-center p-4 z-50 overflow-hidden">
+    {/* Animated Backdrop */}
+    <div 
+      className="absolute inset-0 bg-slate-900/40 backdrop-blur-md transition-opacity"
+      onClick={() => setShowCreateSession(false)}
+    />
+
+    {/* Attractive UI Elements: Animated Blobs */}
+    <div className="absolute top-1/4 left-1/3 w-64 h-64 bg-cyan-400/30 rounded-full mix-blend-multiply filter blur-3xl animate-blob" />
+    <div className="absolute bottom-1/4 right-1/3 w-64 h-64 bg-purple-400/30 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000" />
+
+    {/* Modal Container */}
+    <div className="relative bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl max-w-md w-full border border-white/50 overflow-hidden transform transition-all animate-in zoom-in duration-300">
+      
+      {/* High-Visibility Dot Pattern Overlay */}
+      <div className="absolute inset-0 opacity-[0.03] pointer-events-none" 
+           style={{ backgroundImage: `radial-gradient(#000 1px, transparent 1px)`, backgroundSize: '20px 20px' }} />
+
+      {/* Decorative Header Accent */}
+      <div className="h-1.5 w-full bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500" />
+
+      <div className="relative p-8">
+        <div className="flex justify-between items-start mb-6">
+          <div>
+            <h3 className="text-2xl font-bold text-gray-900 tracking-tight">
               Schedule New Session
             </h3>
-            
-            <form onSubmit={handleCreateSession}>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Session Title
-                  </label>
-                  <input
-                    type="text"
-                    value={sessionData.title}
-                    onChange={(e) => setSessionData({ ...sessionData, title: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
-                    placeholder="e.g., Introduction to React Hooks"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Description
-                  </label>
-                  <textarea
-                    value={sessionData.description}
-                    onChange={(e) => setSessionData({ ...sessionData, description: e.target.value })}
-                    rows="3"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
-                    placeholder="What will you cover in this session?"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Date & Time
-                    </label>
-                    <input
-                      type="datetime-local"
-                      value={sessionData.scheduledTime}
-                      onChange={(e) => setSessionData({ ...sessionData, scheduledTime: e.target.value })}
-                      className="w-full px-3 py-2 border hover:cursor-pointer border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Duration (minutes)
-                    </label>
-                    <select
-                      value={sessionData.duration}
-                      onChange={(e) => setSessionData({ ...sessionData, duration: parseInt(e.target.value) })}
-                      className="w-full px-3 py-2 border hover:cursor-pointer border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
-                    >
-                     
-                      <option value="30">30 min</option>
-                      <option value="60">60 min</option>
-                      <option value="90">90 min</option>
-                      <option value="120">120 min</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Skill You'll Teach
-                  </label>
-                  <div className="px-3 py-2 bg-green-50 rounded-lg">
-                    <span className="font-medium text-green-900">{getSkillTaughtByCurrentUser(selectedPair).name}</span>
-                    <span className="ml-2 text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
-                      {getSkillTaughtByCurrentUser(selectedPair).level}
-                    </span>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Skill You'll Learn
-                  </label>
-                  <div className="px-3 py-2 bg-blue-50 rounded-lg">
-                    <span className="font-medium text-blue-900">{getSkillLearnedByCurrentUser(selectedPair).name}</span>
-                    <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
-                      {getSkillLearnedByCurrentUser(selectedPair).level}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex justify-end space-x-3 mt-6">
-                <button
-                  type="button"
-                  onClick={() => setShowCreateSession(false)}
-                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-primary-600 border hover:cursor-pointer hover:bg-gray-50 border-gray-300 text-gray-700 rounded-lg hover:bg-primary-700 transition"
-                >
-                  Schedule Session
-                </button>
-              </div>
-            </form>
+            <p className="text-sm text-gray-500 mt-1">Set a time to exchange your expertise.</p>
           </div>
         </div>
-      )}
+        
+        <form onSubmit={handleCreateSession} className="relative">
+          <div className="space-y-5">
+            {/* Session Title */}
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 ml-1">
+                Session Title
+              </label>
+              <input
+                type="text"
+                value={sessionData.title}
+                onChange={(e) => setSessionData({ ...sessionData, title: e.target.value })}
+                className="w-full px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-cyan-500 focus:bg-white focus:border-transparent transition-all outline-none text-gray-900 placeholder:text-gray-400"
+                placeholder="e.g., Introduction to React Hooks"
+                required
+              />
+            </div>
+
+            {/* Description */}
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 ml-1">
+                Description
+              </label>
+              <textarea
+                value={sessionData.description}
+                onChange={(e) => setSessionData({ ...sessionData, description: e.target.value })}
+                rows="3"
+                className="w-full px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-cyan-500 focus:bg-white focus:border-transparent transition-all outline-none text-gray-900 resize-none"
+                placeholder="What will you cover in this session?"
+              />
+            </div>
+
+            {/* Grid for Time and Duration */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 ml-1">
+                  Date & Time
+                </label>
+                <input
+                  type="datetime-local"
+                  value={sessionData.scheduledTime}
+                  onChange={(e) => setSessionData({ ...sessionData, scheduledTime: e.target.value })}
+                  className="w-full px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-cyan-500 transition-all outline-none hover:cursor-pointer text-gray-900 text-sm"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2 ml-1">
+                  Duration
+                </label>
+                <select
+                  value={sessionData.duration}
+                  onChange={(e) => setSessionData({ ...sessionData, duration: parseInt(e.target.value) })}
+                  className="w-full px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-cyan-500 transition-all outline-none hover:cursor-pointer text-gray-900 text-sm appearance-none"
+                >
+                  <option value="30">30 min</option>
+                  <option value="60">60 min</option>
+                  <option value="90">90 min</option>
+                  <option value="120">120 min</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Skills Info Blocks */}
+            <div className="space-y-3 pt-2">
+              <div className="group p-4 bg-emerald-50/50 border border-emerald-100 rounded-2xl transition-all hover:bg-emerald-50">
+                <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-1">Teaching</p>
+                <div className="flex justify-between items-center">
+                  <span className="font-bold text-emerald-900">{getSkillTaughtByCurrentUser(selectedPair).name}</span>
+                  <span className="text-[10px] bg-emerald-200/50 text-emerald-800 px-2.5 py-1 rounded-full font-bold border border-emerald-200">
+                    {getSkillTaughtByCurrentUser(selectedPair).level}
+                  </span>
+                </div>
+              </div>
+
+              <div className="group p-4 bg-cyan-50/50 border border-cyan-100 rounded-2xl transition-all hover:bg-cyan-50">
+                <p className="text-[10px] font-black text-cyan-600 uppercase tracking-widest mb-1">Learning</p>
+                <div className="flex justify-between items-center">
+                  <span className="font-bold text-cyan-900">{getSkillLearnedByCurrentUser(selectedPair).name}</span>
+                  <span className="text-[10px] bg-cyan-200/50 text-cyan-800 px-2.5 py-1 rounded-full font-bold border border-cyan-200">
+                    {getSkillLearnedByCurrentUser(selectedPair).level}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex gap-3 mt-8">
+            <button
+              type="button"
+              onClick={() => setShowCreateSession(false)}
+              className="flex-1 px-4 py-3.5 border border-gray-200 text-gray-600 font-bold rounded-2xl hover:bg-gray-50 active:scale-95 transition-all"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="flex-[2] px-4 py-3.5 bg-gray-900 text-white font-bold rounded-2xl hover:bg-gray-800 shadow-xl shadow-gray-200 active:scale-95 transition-all flex items-center justify-center gap-2"
+            >
+              Schedule Session
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 };
