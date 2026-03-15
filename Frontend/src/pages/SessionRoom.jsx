@@ -49,6 +49,7 @@ const SessionRoom = () => {
   const screenStreamRef = useRef();
   const messagesEndRef = useRef();
   const typingTimeoutRef = useRef();
+  const pairDetailsRef = useRef(null);
 
   useEffect(() => {
     if (user && pairId) {
@@ -322,7 +323,6 @@ const initSocket = async () => {
       }
     });
 
-    const pairDetailsRef = useRef(null);
 
     // Peer event listeners
     peerRef.current.on('signal', (data) => {
