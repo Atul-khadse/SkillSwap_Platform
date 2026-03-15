@@ -11,6 +11,9 @@ import {
   Pencil,
   Plus,
   Trash2,
+  X,
+  Save,
+  BookOpen
 } from 'lucide-react';
 
 const Profile = () => {
@@ -45,12 +48,7 @@ const Profile = () => {
     }
   }, [user]);
 
-  useEffect(() => {
-  if (user) {
-    // Optionally refetch to get latest data
-    authAPI.getProfile().then(res => setUserData(res.data));
-  }
-}, []);
+  // UseEffect for profile fetching removed as per original logic/safety
 
   const handleInputChange = (e) => {
     setFormData({
@@ -81,387 +79,305 @@ const Profile = () => {
     setSkillsNeeded(skillsNeeded.filter((_, i) => i !== index));
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  setLoading(true);
-
-  try {
-    const updatedData = {
-      ...formData,
-      skillsOffered,
-      skillsNeeded,
-    };
-
-    const result = await updateProfile(updatedData);
-    if (result.success) {
-      setEditMode(false);
-      toast.success('Profile updated successfully!');
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const updatedData = { ...formData, skillsOffered, skillsNeeded };
+      const result = await updateProfile(updatedData);
+      if (result.success) {
+        setEditMode(false);
+        toast.success('Profile updated successfully!');
+      }
+    } catch (error) {
+      console.error('Profile update error:', error);
+      toast.error('Failed to update profile');
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    console.error('Profile update error:', error);
-    toast.error('Failed to update profile');
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   const skillLevels = ['beginner', 'intermediate', 'advanced', 'expert'];
   const priorities = ['low', 'medium', 'high'];
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Profile</h1>
-          <p className="text-gray-600 mt-2">Manage your personal information and skills</p>
+    <div className="min-h-screen bg-gray-50/50 py-12">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        {/* Header Section */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+          <div>
+            <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">Profile</h1>
+            <p className="text-gray-500 mt-1 font-medium">Personalize your exchange identity</p>
+          </div>
+          <button
+            onClick={() => setEditMode(!editMode)}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold transition-all active:scale-95 shadow-sm
+              ${editMode 
+                ? 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50' 
+                : 'bg-gray-900 text-white hover:bg-gray-800'}`}
+          >
+            {editMode ? <><X className="h-4 w-4" /> Cancel</> : <><Pencil className="h-4 w-4" /> Edit Profile</>}
+          </button>
         </div>
-        <button
-          onClick={() => setEditMode(!editMode)}
-          className={`px-4 py-2 rounded-lg flex items-center ${editMode ? 'bg-gray-200 hover:cursor-pointer text-gray-700' : 'bg-gray-200 text-gray-700 hover:bg-gray-50 hover:cursor-pointer' } transition`}
-        >
-          <Pencil className="h-4 w-4 mr-2" />
-          {editMode ? 'Cancel Edit' : 'Edit Profile'}
-        </button>
-      </div>
 
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-        {/* Profile Header */}
-        <div className="bg-gradient-to-r from-primary-600 to-secondary-600 p-8">
-          <div className="flex items-center">
-            <div className="h-24 w-24 bg-white rounded-full flex items-center justify-center border-4 border-white">
-              {formData.avatar ? (
-                <img
-                  src={formData.avatar}
-                  alt={formData.name}
-                  className="h-24 w-24 rounded-full"
-                />
-              ) : (
-                <User className="h-12 w-12 text-primary-600" />
-              )}
-            </div>
-            <div className="ml-6">
-              <h2 className="text-2xl font-bold text-black">{formData.name}</h2>
-              <p className="text-primary-100 mt-1">{formData.bio || 'No bio yet'}</p>
-              <div className="flex items-center text-primary-100 mt-2 space-x-4">
-                {formData.location && (
-                  <div className="flex items-center">
-                    <MapPin className="h-4 w-4 mr-1" />
-                    {formData.location}
-                  </div>
-                )}
-                {formData.timezone && (
-                  <div className="flex items-center">
-                    <Globe className="h-4 w-4 mr-1" />
-                    {formData.timezone}
-                  </div>
-                )}
+        <div className="bg-white rounded-[2rem] shadow-xl shadow-gray-200/50 overflow-hidden border border-gray-100">
+          
+          {/* Profile Hero Header */}
+          <div className="relative bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-950 p-8 sm:p-12">
+            {/* Dot Pattern Overlay */}
+            <div className="absolute inset-0 opacity-10 pointer-events-none" 
+                 style={{ backgroundImage: `radial-gradient(#fff 1.2px, transparent 1.2px)`, backgroundSize: '20px 20px' }} />
+            
+            <div className="relative flex flex-col sm:flex-row items-center sm:items-end gap-6">
+              <div className="relative group">
+                <div className="h-32 w-32 bg-white rounded-3xl flex items-center justify-center p-1 shadow-2xl overflow-hidden transform transition-transform group-hover:rotate-3">
+                  {formData.avatar ? (
+                    <img src={formData.avatar} alt={formData.name} className="h-full w-full object-cover rounded-[1.4rem]" />
+                  ) : (
+                    <div className="h-full w-full bg-blue-50 flex items-center justify-center rounded-[1.4rem]">
+                      <User className="h-14 w-14 text-blue-600" />
+                    </div>
+                  )}
+                </div>
+              </div>
+              
+              <div className="text-center sm:text-left flex-1 pb-2">
+                <h2 className="text-3xl font-bold text-white">{formData.name || 'Your Name'}</h2>
+                <p className="text-blue-200/80 mt-2 max-w-md line-clamp-2 leading-relaxed font-medium">
+                  {formData.bio || 'Add a bio to let others know what you are about.'}
+                </p>
+                <div className="flex flex-wrap justify-center sm:justify-start gap-4 mt-4 text-sm font-semibold text-blue-100/70">
+                  {formData.location && <span className="flex items-center gap-1.5"><MapPin className="h-4 w-4 text-blue-400" /> {formData.location}</span>}
+                  {formData.timezone && <span className="flex items-center gap-1.5"><Globe className="h-4 w-4 text-blue-400" /> {formData.timezone}</span>}
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <form onSubmit={handleSubmit} className="p-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Full Name
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <User className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  disabled={!editMode}
-                  className={`w-full pl-10 pr-3 py-2 border rounded-lg ${editMode ? 'border-gray-300 focus:ring-2 focus:ring-primary-500' : 'border-transparent bg-gray-50'}`}
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  disabled={!editMode}
-                  className={`w-full pl-10 pr-3 py-2 border rounded-lg ${editMode ? 'border-gray-300 focus:ring-2 focus:ring-primary-500' : 'border-transparent bg-gray-50'}`}
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Location
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <MapPin className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  type="text"
-                  name="location"
-                  value={formData.location}
-                  onChange={handleInputChange}
-                  disabled={!editMode}
-                  placeholder="City, Country"
-                  className={`w-full pl-10 pr-3 py-2 border rounded-lg ${editMode ? 'border-gray-300 focus:ring-2 focus:ring-primary-500' : 'border-transparent bg-gray-50'}`}
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Timezone
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Globe className="h-5 w-5 text-gray-400" />
-                </div>
-                <select
-                  name="timezone"
-                  value={formData.timezone}
-                  onChange={handleInputChange}
-                  disabled={!editMode}
-                  className={`w-full pl-10 pr-3 py-2 border rounded-lg ${editMode ? 'border-gray-300 focus:ring-2 focus:ring-primary-500' : 'border-transparent bg-gray-50'}`}
-                >
-                  <option value="">Select timezone</option>
-                  <option value="UTC-5">EST (UTC-5)</option>
-                  <option value="UTC-8">PST (UTC-8)</option>
-                  <option value="UTC+0">GMT (UTC+0)</option>
-                  <option value="UTC+1">CET (UTC+1)</option>
-                  <option value="UTC+5:30">IST (UTC+5:30)</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Bio
-              </label>
-              <textarea
-                name="bio"
-                value={formData.bio}
-                onChange={handleInputChange}
-                disabled={!editMode}
-                rows="3"
-                placeholder="Tell others about yourself..."
-                className={`w-full px-3 py-2 border rounded-lg ${editMode ? 'border-gray-300 focus:ring-2 focus:ring-primary-500' : 'border-transparent bg-gray-50'}`}
-              />
-            </div>
-          </div>
-
-          {/* Skills Offered */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                <GraduationCap className="h-5 w-5 mr-2 text-green-600" />
-                Skills I Can Teach
+          <form onSubmit={handleSubmit} className="p-6 sm:p-10 space-y-10">
+            {/* Basic Info Section */}
+            <section>
+              <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-400 mb-6 flex items-center gap-2">
+                <div className="h-1 w-8 bg-blue-500 rounded-full" /> Personal Details
               </h3>
-              {editMode && (
-                <button
-                  type="button"
-                  onClick={handleAddSkillOffered}
-                  className="text-sm text-primary-600 hover:text-primary-700"
-                >
-                  <Plus className="h-4 w-4 inline mr-1" />
-                  Add Skill
-                </button>
-              )}
-            </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {[
+                  { label: 'Full Name', name: 'name', icon: User, type: 'text' },
+                  { label: 'Email Address', name: 'email', icon: Mail, type: 'email' },
+                  { label: 'Location', name: 'location', icon: MapPin, type: 'text', placeholder: 'City, Country' }
+                ].map((field) => (
+                  <div key={field.name}>
+                    <label className="block text-sm font-bold text-gray-700 mb-2 ml-1">{field.label}</label>
+                    <div className="relative group">
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-colors group-focus-within:text-blue-600">
+                        <field.icon className="h-5 w-5 text-gray-400" />
+                      </div>
+                      <input
+                        type={field.type}
+                        name={field.name}
+                        value={formData[field.name]}
+                        onChange={handleInputChange}
+                        disabled={!editMode}
+                        placeholder={field.placeholder}
+                        className={`w-full pl-12 pr-4 py-3 border-2 rounded-2xl transition-all outline-none font-medium
+                          ${editMode ? 'border-gray-100 bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-50' : 'border-transparent bg-gray-50 text-gray-600'}`}
+                      />
+                    </div>
+                  </div>
+                ))}
 
-            {editMode && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2 ml-1">Timezone</label>
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-colors group-focus-within:text-blue-600">
+                      <Globe className="h-5 w-5 text-gray-400" />
+                    </div>
+                    <select
+                      name="timezone"
+                      value={formData.timezone}
+                      onChange={handleInputChange}
+                      disabled={!editMode}
+                      className={`w-full pl-12 pr-4 py-3 border-2 rounded-2xl transition-all outline-none font-medium appearance-none
+                        ${editMode ? 'border-gray-100 bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-50' : 'border-transparent bg-gray-50 text-gray-600'}`}
+                    >
+                      <option value="">Select timezone</option>
+                      <option value="UTC-5">EST (UTC-5)</option>
+                      <option value="UTC-8">PST (UTC-8)</option>
+                      <option value="UTC+0">GMT (UTC+0)</option>
+                      <option value="UTC+5:30">IST (UTC+5:30)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-bold text-gray-700 mb-2 ml-1">Professional Bio</label>
+                  <textarea
+                    name="bio"
+                    value={formData.bio}
+                    onChange={handleInputChange}
+                    disabled={!editMode}
+                    rows="3"
+                    className={`w-full px-4 py-4 border-2 rounded-2xl transition-all outline-none font-medium resize-none
+                      ${editMode ? 'border-gray-100 bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-50' : 'border-transparent bg-gray-50 text-gray-600'}`}
+                  />
+                </div>
+              </div>
+            </section>
+
+            {/* Skills Offered Section */}
+            <section>
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-400 flex items-center gap-2">
+                  <div className="h-1 w-8 bg-emerald-500 rounded-full" /> Skills I Can Teach
+                </h3>
+              </div>
+
+              {editMode && (
+                <div className="flex flex-col md:flex-row gap-3 p-4 bg-emerald-50/50 border border-emerald-100 rounded-[1.5rem] mb-6 animate-in slide-in-from-top-2">
                   <input
                     type="text"
                     value={newSkillOffered.name}
                     onChange={(e) => setNewSkillOffered({ ...newSkillOffered, name: e.target.value })}
-                    placeholder="Skill name"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                    placeholder="E.g. React"
+                    className="flex-1 px-4 py-2 border-none rounded-xl bg-white focus:ring-2 focus:ring-emerald-500 outline-none text-sm font-semibold"
                   />
-                </div>
-                <div>
                   <select
                     value={newSkillOffered.level}
                     onChange={(e) => setNewSkillOffered({ ...newSkillOffered, level: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                    className="md:w-40 px-4 py-2 border-none rounded-xl bg-white focus:ring-2 focus:ring-emerald-500 outline-none text-sm font-semibold appearance-none"
                   >
-                    {skillLevels.map(level => (
-                      <option key={level} value={level}>
-                        {level.charAt(0).toUpperCase() + level.slice(1)}
-                      </option>
-                    ))}
+                    {skillLevels.map(l => <option key={l} value={l}>{l}</option>)}
                   </select>
-                </div>
-                <div>
                   <button
                     type="button"
                     onClick={handleAddSkillOffered}
-                    className="w-full hover:cursor-pointer bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
+                    className="bg-emerald-600 text-white px-6 py-2 rounded-xl hover:bg-emerald-700 transition font-bold text-sm shadow-lg shadow-emerald-200"
                   >
-                    Add Skill
+                    Add
                   </button>
                 </div>
-              </div>
-            )}
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {skillsOffered.map((skill, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-100"
-                >
-                  <div>
-                    <span className="font-medium text-green-800">{skill.name}</span>
-                    <span className="ml-2 px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
-                      {skill.level}
-                    </span>
-                  </div>
-                  {editMode && (
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveSkillOffered(index)}
-                      className="text-red-600 hover:text-red-800"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Skills Needed */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                <GraduationCap className="h-5 w-5 mr-2 text-blue-600" />
-                Skills I Want to Learn
-              </h3>
-              {editMode && (
-                <button
-                  type="button"
-                  onClick={handleAddSkillNeeded}
-                  className="text-sm text-primary-600 hover:text-primary-700"
-                >
-                  <Plus className="h-4 w-4 inline mr-1" />
-                  Add Skill
-                </button>
               )}
-            </div>
 
-            {editMode && (
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-                <div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {skillsOffered.map((skill, index) => (
+                  <div key={index} className="flex items-center justify-between p-4 bg-white border border-gray-100 rounded-2xl group transition-all hover:border-emerald-200 hover:shadow-md">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+                        <GraduationCap className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <p className="font-bold text-gray-900">{skill.name}</p>
+                        <p className="text-[10px] font-black uppercase text-emerald-500 tracking-tighter">{skill.level}</p>
+                      </div>
+                    </div>
+                    {editMode && (
+                      <button type="button" onClick={() => handleRemoveSkillOffered(index)} className="p-2 text-gray-300 hover:text-red-500 transition-colors">
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* Skills Needed Section */}
+            <section>
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-400 flex items-center gap-2">
+                  <div className="h-1 w-8 bg-blue-500 rounded-full" /> Skills I Want to Learn
+                </h3>
+              </div>
+
+              {editMode && (
+                <div className="flex flex-col lg:flex-row gap-3 p-4 bg-blue-50/50 border border-blue-100 rounded-[1.5rem] mb-6">
                   <input
                     type="text"
                     value={newSkillNeeded.name}
                     onChange={(e) => setNewSkillNeeded({ ...newSkillNeeded, name: e.target.value })}
-                    placeholder="Skill name"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                    placeholder="E.g. Python"
+                    className="flex-1 px-4 py-2 border-none rounded-xl bg-white focus:ring-2 focus:ring-blue-500 outline-none text-sm font-semibold"
                   />
-                </div>
-                <div>
-                  <select
-                    value={newSkillNeeded.level}
-                    onChange={(e) => setNewSkillNeeded({ ...newSkillNeeded, level: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
-                  >
-                    {skillLevels.map(level => (
-                      <option key={level} value={level}>
-                        {level.charAt(0).toUpperCase() + level.slice(1)}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <select
-                    value={newSkillNeeded.priority}
-                    onChange={(e) => setNewSkillNeeded({ ...newSkillNeeded, priority: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
-                  >
-                    {priorities.map(priority => (
-                      <option key={priority} value={priority}>
-                        {priority.charAt(0).toUpperCase() + priority.slice(1)}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
+                  <div className="flex gap-2">
+                    <select
+                      value={newSkillNeeded.level}
+                      onChange={(e) => setNewSkillNeeded({ ...newSkillNeeded, level: e.target.value })}
+                      className="flex-1 px-4 py-2 border-none rounded-xl bg-white focus:ring-2 focus:ring-blue-500 outline-none text-sm font-semibold appearance-none"
+                    >
+                      {skillLevels.map(l => <option key={l} value={l}>{l}</option>)}
+                    </select>
+                    <select
+                      value={newSkillNeeded.priority}
+                      onChange={(e) => setNewSkillNeeded({ ...newSkillNeeded, priority: e.target.value })}
+                      className="flex-1 px-4 py-2 border-none rounded-xl bg-white focus:ring-2 focus:ring-blue-500 outline-none text-sm font-semibold appearance-none"
+                    >
+                      {priorities.map(p => <option key={p} value={p}>{p}</option>)}
+                    </select>
+                  </div>
                   <button
                     type="button"
                     onClick={handleAddSkillNeeded}
-                    className="w-full bg-blue-600 hover:cursor-pointer text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+                    className="bg-blue-600 text-white px-6 py-2 rounded-xl hover:bg-blue-700 transition font-bold text-sm shadow-lg shadow-blue-200"
                   >
-                    Add Skill
+                    Add
                   </button>
                 </div>
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {skillsNeeded.map((skill, index) => (
+                  <div key={index} className="flex items-center justify-between p-4 bg-white border border-gray-100 rounded-2xl hover:border-blue-200 transition-all hover:shadow-md">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+                        <BookOpen className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <p className="font-bold text-gray-900">{skill.name}</p>
+                        <div className="flex gap-2 mt-1">
+                          <span className="text-[10px] font-black uppercase text-blue-500">{skill.level}</span>
+                          <span className={`text-[10px] font-black uppercase px-2 rounded-md ${
+                            skill.priority === 'high' ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'
+                          }`}>
+                            {skill.priority}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    {editMode && (
+                      <button type="button" onClick={() => handleRemoveSkillNeeded(index)} className="p-2 text-gray-300 hover:text-red-500 transition-colors">
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* Footer Form Actions */}
+            {editMode && (
+              <div className="flex flex-col sm:flex-row justify-end gap-3 pt-8 border-t border-gray-100">
+                <button
+                  type="button"
+                  onClick={() => setEditMode(false)}
+                  className="px-8 py-3 bg-white border-2 border-gray-100 text-gray-600 font-bold rounded-2xl hover:bg-gray-50 active:scale-95 transition-all"
+                >
+                  Discard Changes
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="flex items-center justify-center gap-2 px-10 py-3 bg-gray-900 text-white font-bold rounded-2xl hover:bg-black active:scale-95 transition-all shadow-xl shadow-gray-200 disabled:bg-gray-400"
+                >
+                  {loading ? (
+                    <div className="h-5 w-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    <><Save className="h-5 w-5" /> Save Changes</>
+                  )}
+                </button>
               </div>
             )}
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {skillsNeeded.map((skill, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-100"
-                >
-                  <div>
-                    <span className="font-medium text-blue-800">{skill.name}</span>
-                    <span className="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
-                      {skill.level}
-                    </span>
-                    <span className={`ml-2 px-2 py-1 text-xs rounded-full ${
-                      skill.priority === 'high' ? 'bg-red-100 text-red-800' :
-                      skill.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-green-100 text-green-800'
-                    }`}>
-                      {skill.priority}
-                    </span>
-                  </div>
-                  {editMode && (
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveSkillNeeded(index)}
-                      className="text-red-600 hover:text-red-800"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {editMode && (
-            <div className="flex justify-end space-x-3 pt-6 border-t">
-              <button
-                type="button"
-                onClick={() => setEditMode(false)}
-                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:cursor-pointer hover:bg-gray-50 transition"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={loading}
-                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:cursor-pointer hover:bg-gray-50 transition"
-              >
-                {loading ? 'Saving...' : 'Save Changes'}
-              </button>
-            </div>
-          )}
-        </form>
+          </form>
+        </div>
       </div>
     </div>
   );
