@@ -10,6 +10,7 @@ import {
   Clock,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
+import RatingStars from '../components/RatingStars.jsx';
 
 const Explore = () => {
   const [users, setUsers] = useState([]);
@@ -46,7 +47,7 @@ const Explore = () => {
         page,
         limit,
       });
-      
+
       // The backend returns: { users, page, pages, total }
       const { users: usersArray, pages } = response.data;
       setUsers(usersArray || []);
@@ -93,7 +94,7 @@ const Explore = () => {
       };
 
       const response = await exchangeAPI.sendRequest(requestPayload);
-      
+
       if (response.data) {
         toast.success('Exchange request sent successfully!');
         setShowRequestModal(false);
@@ -185,7 +186,7 @@ const Explore = () => {
             </button>
           </div>
         </div>
-        
+
         {/* Reset filter button */}
         <div className="mt-4">
           <button
@@ -282,11 +283,15 @@ const Explore = () => {
                       )}
                     </div>
                   </div>
+                  {/*  Rating */}
+                  <div className="mt-4 flex items-center justify-between">
+                    <RatingStars rating={user.ratingAverage} size={16} showCount count={user.ratingCount} />
+                  </div>
                 </div>
               </div>
 
               <div className="bg-gray-50 px-6 py-4">
-              
+
                 <button
                   onClick={() => {
                     setSelectedUser(user);
@@ -326,127 +331,127 @@ const Explore = () => {
       )}
 
       {/* Request Modal */}
-{showRequestModal && selectedUser && (
-  <div className="fixed inset-0 flex items-center justify-center p-4 z-50 overflow-hidden">
-    {/* Animated Glass Overlay */}
-    <div 
-      className="absolute inset-0 bg-slate-900/40 backdrop-blur-md transition-opacity"
-      onClick={() => {
-        setShowRequestModal(false);
-        setSelectedUser(null);
-      }}
-    />
-
-    {/* Attractive UI Background: Dot Pattern */}
-    <div className="absolute inset-0 z-0 opacity-40 pointer-events-none" 
-         style={{ 
-           backgroundImage: `radial-gradient(#cbd5e1 1.5px, transparent 1.5px)`, 
-           backgroundSize: '24px 24px' 
-         }}>
-    </div>
-
-    {/* Modal Container */}
-    <div className="relative bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl max-w-md w-full border border-white/50 overflow-hidden transform transition-all animate-in zoom-in duration-300">
-      
-      {/* Top Gradient Bar */}
-      <div className="h-2 w-full bg-gradient-to-r from-[#1199c7] to-cyan-400" />
-
-      <div className="p-8">
-        <div className="mb-6">
-          <h3 className="text-2xl font-bold text-gray-900 tracking-tight">
-            Exchange Request
-          </h3>
-          <p className="text-sm text-gray-500 mt-1">
-            Send a proposal to <span className="text-[#1199c7] font-semibold">{selectedUser.name}</span>
-          </p>
-        </div>
-        
-        <div className="space-y-5">
-          {/* Skill Offered */}
-          <div className="relative group">
-            <label className="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">
-              Skill You'll Offer
-            </label>
-            <select
-              value={requestData.skillOffered}
-              onChange={(e) => setRequestData({ ...requestData, skillOffered: e.target.value })}
-              className="w-full px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-[#1199c7] transition-all outline-none hover:cursor-pointer text-gray-900 text-sm appearance-none"
-            >
-              <option value="">Select a skill</option>
-              {selectedUser.skillsNeeded?.map((skill, index) => (
-                <option key={index} value={skill.name}>
-                  {skill.name} ({skill.level})
-                </option>
-              ))}
-            </select>
-            <div className="absolute right-4 bottom-3.5 pointer-events-none text-gray-400">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
-            </div>
-          </div>
-
-          {/* Skill Requested */}
-          <div className="relative group">
-            <label className="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">
-              Skill You Want to Learn
-            </label>
-            <select
-              value={requestData.skillRequested}
-              onChange={(e) => setRequestData({ ...requestData, skillRequested: e.target.value })}
-              className="w-full px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-[#1199c7] transition-all outline-none hover:cursor-pointer text-gray-900 text-sm appearance-none"
-            >
-              <option value="">Select a skill</option>
-              {selectedUser.skillsOffered?.map((skill, index) => (
-                <option key={index} value={skill.name}>
-                  {skill.name} ({skill.level})
-                </option>
-              ))}
-            </select>
-            <div className="absolute right-4 bottom-3.5 pointer-events-none text-gray-400">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
-            </div>
-          </div>
-
-          {/* Message */}
-          <div>
-            <label className="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">
-              Message (Optional)
-            </label>
-            <textarea
-              value={requestData.message}
-              onChange={(e) => setRequestData({ ...requestData, message: e.target.value })}
-              rows="3"
-              placeholder="Introduce yourself and suggest a time..."
-              className="w-full px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-[#1199c7] focus:bg-white transition-all outline-none text-gray-900 text-sm resize-none"
-            />
-          </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex gap-3 mt-8">
-          <button
+      {showRequestModal && selectedUser && (
+        <div className="fixed inset-0 flex items-center justify-center p-4 z-50 overflow-hidden">
+          {/* Animated Glass Overlay */}
+          <div
+            className="absolute inset-0 bg-slate-900/40 backdrop-blur-md transition-opacity"
             onClick={() => {
               setShowRequestModal(false);
               setSelectedUser(null);
             }}
-            className="flex-1 px-4 py-3.5 border border-gray-200 text-gray-600 font-bold rounded-2xl hover:bg-gray-50 active:scale-95 transition-all"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSendRequest}
-            className={`flex-[2] px-4 py-3.5 text-white font-bold rounded-2xl shadow-xl transition-all active:scale-95 flex items-center justify-center gap-2
-              ${!requestData.skillOffered || !requestData.skillRequested 
-                ? 'bg-gray-300 cursor-not-allowed opacity-70' 
-                : 'bg-[#1199c7] hover:bg-[#0e7ba0] shadow-[#1199c7]/20 hover:cursor-pointer'}`}
-            disabled={!requestData.skillOffered || !requestData.skillRequested}
-          >
-            Send Request
-          </button>
+          />
+
+          {/* Attractive UI Background: Dot Pattern */}
+          <div className="absolute inset-0 z-0 opacity-40 pointer-events-none"
+            style={{
+              backgroundImage: `radial-gradient(#cbd5e1 1.5px, transparent 1.5px)`,
+              backgroundSize: '24px 24px'
+            }}>
+          </div>
+
+          {/* Modal Container */}
+          <div className="relative bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl max-w-md w-full border border-white/50 overflow-hidden transform transition-all animate-in zoom-in duration-300">
+
+            {/* Top Gradient Bar */}
+            <div className="h-2 w-full bg-gradient-to-r from-[#1199c7] to-cyan-400" />
+
+            <div className="p-8">
+              <div className="mb-6">
+                <h3 className="text-2xl font-bold text-gray-900 tracking-tight">
+                  Exchange Request
+                </h3>
+                <p className="text-sm text-gray-500 mt-1">
+                  Send a proposal to <span className="text-[#1199c7] font-semibold">{selectedUser.name}</span>
+                </p>
+              </div>
+
+              <div className="space-y-5">
+                {/* Skill Offered */}
+                <div className="relative group">
+                  <label className="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">
+                    Skill You'll Offer
+                  </label>
+                  <select
+                    value={requestData.skillOffered}
+                    onChange={(e) => setRequestData({ ...requestData, skillOffered: e.target.value })}
+                    className="w-full px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-[#1199c7] transition-all outline-none hover:cursor-pointer text-gray-900 text-sm appearance-none"
+                  >
+                    <option value="">Select a skill</option>
+                    {selectedUser.skillsNeeded?.map((skill, index) => (
+                      <option key={index} value={skill.name}>
+                        {skill.name} ({skill.level})
+                      </option>
+                    ))}
+                  </select>
+                  <div className="absolute right-4 bottom-3.5 pointer-events-none text-gray-400">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
+                  </div>
+                </div>
+
+                {/* Skill Requested */}
+                <div className="relative group">
+                  <label className="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">
+                    Skill You Want to Learn
+                  </label>
+                  <select
+                    value={requestData.skillRequested}
+                    onChange={(e) => setRequestData({ ...requestData, skillRequested: e.target.value })}
+                    className="w-full px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-[#1199c7] transition-all outline-none hover:cursor-pointer text-gray-900 text-sm appearance-none"
+                  >
+                    <option value="">Select a skill</option>
+                    {selectedUser.skillsOffered?.map((skill, index) => (
+                      <option key={index} value={skill.name}>
+                        {skill.name} ({skill.level})
+                      </option>
+                    ))}
+                  </select>
+                  <div className="absolute right-4 bottom-3.5 pointer-events-none text-gray-400">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
+                  </div>
+                </div>
+
+                {/* Message */}
+                <div>
+                  <label className="block text-xs font-black uppercase tracking-widest text-gray-400 mb-2 ml-1">
+                    Message (Optional)
+                  </label>
+                  <textarea
+                    value={requestData.message}
+                    onChange={(e) => setRequestData({ ...requestData, message: e.target.value })}
+                    rows="3"
+                    placeholder="Introduce yourself and suggest a time..."
+                    className="w-full px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-[#1199c7] focus:bg-white transition-all outline-none text-gray-900 text-sm resize-none"
+                  />
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 mt-8">
+                <button
+                  onClick={() => {
+                    setShowRequestModal(false);
+                    setSelectedUser(null);
+                  }}
+                  className="flex-1 px-4 py-3.5 border border-gray-200 text-gray-600 font-bold rounded-2xl hover:bg-gray-50 active:scale-95 transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSendRequest}
+                  className={`flex-[2] px-4 py-3.5 text-white font-bold rounded-2xl shadow-xl transition-all active:scale-95 flex items-center justify-center gap-2
+              ${!requestData.skillOffered || !requestData.skillRequested
+                      ? 'bg-gray-300 cursor-not-allowed opacity-70'
+                      : 'bg-[#1199c7] hover:bg-[#0e7ba0] shadow-[#1199c7]/20 hover:cursor-pointer'}`}
+                  disabled={!requestData.skillOffered || !requestData.skillRequested}
+                >
+                  Send Request
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
-  </div>
-)}
+      )}
     </div>
   );
 };

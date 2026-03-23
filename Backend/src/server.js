@@ -12,6 +12,7 @@ const userRoutes = require('./routes/userRoutes');
 const exchangeRoutes = require('./routes/exchangeRoutes');
 const sessionRoutes = require('./routes/sessionRoutes');
 const pairRoutes = require('./routes/pairRoutes');
+const ratingRoutes = require('./routes/ratingRoutes');
 
 dotenv.config();
 connectDB();
@@ -69,6 +70,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/exchange', exchangeRoutes);
 app.use('/api/sessions', sessionRoutes);
 app.use('/api/pairs', pairRoutes);
+app.use('/api/ratings', ratingRoutes);
 
 // Basic route
 app.get('/', (req, res) => {

@@ -8,13 +8,16 @@ const Session = require('../models/Session');
 const getUsers = async (req, res) => {
   try {
     const { skill, level, location, page = 1, limit = 10 } = req.query;
-    
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const limitInt = parseInt(limit);
+
+    // Base query: exclude current user
     let query = { _id: { $ne: req.user._id } };
-    
-     // Build an array of conditions for $and
+
+    // Build $and conditions for combined filters
     let andConditions = [];
 
-   if (skill) {
+    if (skill) {
       andConditions.push({
         $or: [
           { 'skillsOffered.name': new RegExp(skill, 'i') },
@@ -22,7 +25,7 @@ const getUsers = async (req, res) => {
         ]
       });
     }
-    
+
     if (location) {
       andConditions.push({
         location: new RegExp(location, 'i')
@@ -37,17 +40,19 @@ const getUsers = async (req, res) => {
         ]
       });
     }
-    
-    if (andConditions.length > 0) {
-      query = { ...query, $and: andConditions };
-    }
-    
-    const users = await User.find(query)
-      .select('-password')
-      .skip((page - 1) * limit)
-      .limit(parseInt(limit))
-      .sort({ lastActive: -1 });
 
+    if (andConditions.length) {
+      query.$and = andConditions;
+    }
+
+    // Execute query with pagination and sorting
+    const users = await User.find(query)
+      .select('-password') // exclude password
+      .sort({ lastActive: -1 })
+      .skip(skip)
+      .limit(limitInt);
+
+    // Get total count for pagination
     const total = await User.countDocuments(query);
 
     res.json({

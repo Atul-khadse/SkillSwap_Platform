@@ -70,12 +70,22 @@ export const userAPI = {
   getPair: (pairId) => api.get(`/pairs/${pairId}`),
 };
 
+
+export const ratingAPI = {
+  submitRating: (data) => api.post('/ratings', data),
+  getUserRatings: (userId) => api.get(`/ratings/user/${userId}`),
+  checkUserRating: (userId) => api.get(`/ratings/check/${userId}`)
+};
+
+
 export const exchangeAPI = {
   sendRequest: (data) => api.post('/exchange/request', data),
   getRequests: (type) => api.get(`/exchange/requests?type=${type}`),
   acceptRequest: (id) => api.put(`/exchange/requests/${id}/accept`),
   rejectRequest: (id) => api.put(`/exchange/requests/${id}/reject`),
 };
+
+
 
 export const sessionAPI = {
   createSession: (data) => api.post('/sessions', data),

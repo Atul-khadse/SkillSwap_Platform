@@ -1,7 +1,7 @@
 // pages/MatchedPairs.jsx
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { userAPI, sessionAPI } from '../services/api';
+import { userAPI, sessionAPI, ratingAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import {
@@ -29,6 +29,54 @@ const MatchedPairs = () => {
     skillTaught: '',
     skillLearned: '',
   });
+
+
+
+  const [showRatingModal, setShowRatingModal] = useState(false);
+  const [ratingPartner, setRatingPartner] = useState(null);
+  const [ratingScore, setRatingScore] = useState(5);
+  const [ratingComment, setRatingComment] = useState('');
+  const [hasRated, setHasRated] = useState(false);
+
+
+  // Check if already rated when modal opens
+  useEffect(() => {
+    if (ratingPartner && user) {
+      const checkRating = async () => {
+        try {
+          const res = await ratingAPI.checkUserRating(ratingPartner._id);
+          setHasRated(res.data.rated);
+        } catch (error) {
+          console.error('Check rating error', error);
+        }
+      };
+      checkRating();
+    }
+  }, [ratingPartner]);
+
+
+  const handleRatePartner = (partner) => {
+    setRatingPartner(partner);
+    setShowRatingModal(true);
+  };
+
+
+  const handleSubmitRating = async () => {
+    try {
+      await ratingAPI.submitRating({
+        ratedUserId: ratingPartner._id,
+        score: ratingScore,
+        comment: ratingComment
+      });
+      toast.success('Rating submitted!');
+      setShowRatingModal(false);
+      setRatingPartner(null);
+      setRatingScore(5);
+      setRatingComment('');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to submit rating');
+    }
+  };
 
   useEffect(() => {
     if (user) {
@@ -300,6 +348,12 @@ const MatchedPairs = () => {
                     >
                       <Plus className="h-4 w-4" />
                     </button>
+                    <button
+                      onClick={() => handleRatePartner(otherUser)}
+                      className="border border-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-50 transition"
+                    >
+                      Rate Partner
+                    </button>
                   </div>
                 </div>
               </div>
@@ -449,6 +503,57 @@ const MatchedPairs = () => {
                 </div>
               </form>
             </div>
+          </div>
+        </div>
+      )}
+      {/* Rating Modal */}
+      {showRatingModal && ratingPartner && (
+        <div className="fixed inset-0 flex items-center justify-center p-4 z-50">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setShowRatingModal(false)} />
+          <div className="relative bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+            <h3 className="text-xl font-bold mb-4">Rate {ratingPartner.name}</h3>
+            {hasRated ? (
+              <p className="text-gray-600">You have already rated this user.</p>
+            ) : (
+              <>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium mb-2">Score (1-5)</label>
+                  <select
+                    value={ratingScore}
+                    onChange={(e) => setRatingScore(Number(e.target.value))}
+                    className="w-full border rounded-lg p-2"
+                  >
+                    {[1, 2, 3, 4, 5].map(score => (
+                      <option key={score} value={score}>{score} star{score !== 1 && 's'}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium mb-2">Comment (optional)</label>
+                  <textarea
+                    value={ratingComment}
+                    onChange={(e) => setRatingComment(e.target.value)}
+                    rows="3"
+                    className="w-full border rounded-lg p-2"
+                    placeholder="Share your experience..."
+                  />
+                </div>
+                <div className="flex justify-end gap-3">
+                  <button
+                    onClick={() => setShowRatingModal(false)}
+                    className="px-4 py-2 border rounded-lg"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSubmitRating}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  >
+                    Submit Rating
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}

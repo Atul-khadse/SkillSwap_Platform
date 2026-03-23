@@ -71,9 +71,19 @@ const userSchema = new mongoose.Schema({
   lastActive: {
     type: Date,
     default: Date.now
+  },
+   ratingAverage: {
+    type: Number,
+    default: 0,
+    min: 0,
+    max: 5
+  },
+  ratingCount: {
+    type: Number,
+    default: 0
   }
 }, {
-  timestamps: true
+  timestamps: true,
 });
 
 // Remove the pre-save hook for now and handle password hashing manually
