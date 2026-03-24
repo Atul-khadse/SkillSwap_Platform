@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { exchangeAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import RatingStars from '../components/RatingStars';
 import toast from 'react-hot-toast';
 import {
   Inbox,
@@ -84,22 +85,20 @@ const ExchangeRequests = () => {
         <nav className="-mb-px flex space-x-8">
           <button
             onClick={() => setActiveTab('received')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'received'
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${activeTab === 'received'
                 ? 'border-primary-500 text-primary-600'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
+              }`}
           >
             <Inbox className="h-4 w-4 inline mr-2" />
             Received ({requests.filter(r => activeTab === 'received').length})
           </button>
           <button
             onClick={() => setActiveTab('sent')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'sent'
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${activeTab === 'sent'
                 ? 'border-primary-500 text-primary-600'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
+              }`}
           >
             <Send className="h-4 w-4 inline mr-2" />
             Sent ({requests.filter(r => activeTab === 'sent').length})
@@ -155,6 +154,14 @@ const ExchangeRequests = () => {
                       <h3 className="text-lg font-semibold text-gray-900">
                         {activeTab === 'received' ? request.requester?.name : request.recipient?.name}
                       </h3>
+                      <div className="flex items-center mt-1">
+                        <RatingStars
+                          rating={activeTab === 'received' ? request.requester?.ratingAverage || 0 : request.recipient?.ratingAverage || 0}
+                          size={14}
+                          showCount
+                          count={activeTab === 'received' ? request.requester?.ratingCount || 0 : request.recipient?.ratingCount || 0}
+                        />
+                      </div>
                       <div className="flex items-center text-sm text-gray-600 mt-1">
                         <Clock className="h-4 w-4 mr-1" />
                         {new Date(request.createdAt).toLocaleDateString()}

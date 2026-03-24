@@ -105,6 +105,15 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const refreshUser = async () => {
+  try {
+    const response = await authAPI.getProfile();
+    setUser(response.data);
+  } catch (error) {
+    console.error('Error refreshing user:', error);
+  }
+};
+
   const value = {
     user,
     loading,
@@ -112,6 +121,7 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     updateProfile,
+    refreshUser,
     isAuthenticated: !!user,
   };
 

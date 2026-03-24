@@ -1,5 +1,6 @@
 // controllers/pairController.js
 const MatchedPair = require('../models/MatchedPair');
+const User = require('../models/User');
 
 // @desc    Get matched pair by ID
 // @route   GET /api/pairs/:id

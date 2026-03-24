@@ -58,8 +58,8 @@ const getExchangeRequests = async (req, res) => {
     }
 
     const requests = await ExchangeRequest.find(query)
-      .populate('requester', 'name email avatar skillsOffered skillsNeeded')
-      .populate('recipient', 'name email avatar skillsOffered skillsNeeded')
+      .populate('requester', 'name email avatar skillsOffered skillsNeeded ratingAverage ratingCount')
+      .populate('recipient', 'name email avatar skillsOffered skillsNeeded ratingAverage ratingCount')
       .sort({ createdAt: -1 });
 
     res.json(requests);
