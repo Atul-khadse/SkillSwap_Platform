@@ -28,6 +28,8 @@ const matchedPairSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+  user1Completed: { type: Boolean, default: false },
+  user2Completed: { type: Boolean, default: false },
   nextSession: {
     date: Date,
     duration: Number,

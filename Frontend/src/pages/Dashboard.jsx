@@ -12,6 +12,7 @@ import {
   ArrowRight,
   User,
   Clock,
+  Trophy,
 } from 'lucide-react';
 
 const Dashboard = () => {
@@ -21,6 +22,7 @@ const Dashboard = () => {
     upcomingSessions: 0,
     pendingRequests: 0,
     skillsLearned: 0,
+    completedExchanges: 0, // new
   });
   const [recentRequests, setRecentRequests] = useState([]);
   const [upcomingSessions, setUpcomingSessions] = useState([]);
@@ -52,6 +54,7 @@ const Dashboard = () => {
         upcomingSessions: sessionsResponse.data?.length || 0,
         pendingRequests: pendingRequests.length,
         skillsLearned: user?.skillsNeeded?.length || 0,
+        completedExchanges: user?.completedPairsCount || 0,
       });
 
       // Set recent requests (last 3 pending)
@@ -96,7 +99,13 @@ const Dashboard = () => {
       icon: GraduationCap,
       color: 'bg-purple-500',
       link: '/profile',
-    },
+    },  {
+    title: 'Completed Exchanges',
+    value: stats.completedExchanges,
+    icon: Trophy,
+    color: 'bg-amber-500',
+    link: '/profile',
+  },
   ];
 
   // Helper function to get the other user in a session

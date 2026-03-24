@@ -87,6 +87,8 @@ export const exchangeAPI = {
 
 
 
+
+
 export const sessionAPI = {
   createSession: (data) => api.post('/sessions', data),
   getSessionsByPair: (pairId, status) => 
@@ -98,6 +100,8 @@ export const sessionAPI = {
 // Remove duplicate getPair function since it's already in userAPI
 export const pairAPI = {
   getPair: (pairId) => api.get(`/pairs/${pairId}`),
+  completePair: (pairId) => api.put(`/pairs/${pairId}/complete`),
+  completeUserTeaching: (pairId) => api.put(`/pairs/${pairId}/complete-user`),
 };
 
 export default api;

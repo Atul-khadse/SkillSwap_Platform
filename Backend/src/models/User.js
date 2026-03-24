@@ -81,7 +81,11 @@ const userSchema = new mongoose.Schema({
   ratingCount: {
     type: Number,
     default: 0
-  }
+  },
+  completedPairsCount: {
+  type: Number,
+  default: 0
+}
 }, {
   timestamps: true,
 });

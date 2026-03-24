@@ -8,15 +8,20 @@ const RatingStars = ({ rating = 0, size = 16, showCount = false, count = 0 }) =>
 
   return (
     <div className="flex items-center gap-1">
-      <div className="flex">
+      <div className="flex gap-0.5">
         {[...Array(fullStars)].map((_, i) => (
-          <Star key={`full-${i}`} size={size} className="fill-yellow-400 text-yellow-400" />
+          <Star key={i} size={size} className="fill-yellow-400 text-yellow-400" />
         ))}
         {hasHalfStar && (
-          <Star size={size} className="fill-yellow-400 text-yellow-400" style={{ clipPath: 'inset(0 50% 0 0)' }} />
+          <div className="relative">
+            <Star size={size} className="text-yellow-400" />
+            <div className="absolute inset-0 overflow-hidden w-1/2">
+              <Star size={size} className="fill-yellow-400 text-yellow-400" />
+            </div>
+          </div>
         )}
         {[...Array(emptyStars)].map((_, i) => (
-          <Star key={`empty-${i}`} size={size} className="text-gray-300" />
+          <Star key={i} size={size} className="text-gray-300" />
         ))}
       </div>
       {showCount && count > 0 && (

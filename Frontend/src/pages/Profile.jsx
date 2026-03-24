@@ -103,7 +103,7 @@ const Profile = () => {
   return (
     <div className="min-h-screen bg-gray-50/50 py-12">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        
+
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
           <div>
@@ -113,8 +113,8 @@ const Profile = () => {
           <button
             onClick={() => setEditMode(!editMode)}
             className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold transition-all active:scale-95 shadow-sm
-              ${editMode 
-                ? 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50' 
+              ${editMode
+                ? 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
                 : 'bg-gray-900 text-white hover:bg-gray-800'}`}
           >
             {editMode ? <><X className="h-4 w-4" /> Cancel</> : <><Pencil className="h-4 w-4" /> Edit Profile</>}
@@ -122,13 +122,13 @@ const Profile = () => {
         </div>
 
         <div className="bg-white rounded-[2rem] shadow-xl shadow-gray-200/50 overflow-hidden border border-gray-100">
-          
+
           {/* Profile Hero Header */}
           <div className="relative bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-950 p-8 sm:p-12">
             {/* Dot Pattern Overlay */}
-            <div className="absolute inset-0 opacity-10 pointer-events-none" 
-                 style={{ backgroundImage: `radial-gradient(#fff 1.2px, transparent 1.2px)`, backgroundSize: '20px 20px' }} />
-            
+            <div className="absolute inset-0 opacity-10 pointer-events-none"
+              style={{ backgroundImage: `radial-gradient(#fff 1.2px, transparent 1.2px)`, backgroundSize: '20px 20px' }} />
+
             <div className="relative flex flex-col sm:flex-row items-center sm:items-end gap-6">
               <div className="relative group">
                 <div className="h-32 w-32 bg-white rounded-3xl flex items-center justify-center p-1 shadow-2xl overflow-hidden transform transition-transform group-hover:rotate-3">
@@ -141,7 +141,7 @@ const Profile = () => {
                   )}
                 </div>
               </div>
-              
+
               <div className="text-center sm:text-left flex-1 pb-2">
                 <h2 className="text-3xl font-bold text-white">{formData.name || 'Your Name'}</h2>
                 <p className="text-blue-200/80 mt-2 max-w-md line-clamp-2 leading-relaxed font-medium">
@@ -151,6 +151,15 @@ const Profile = () => {
                   {formData.location && <span className="flex items-center gap-1.5"><MapPin className="h-4 w-4 text-blue-400" /> {formData.location}</span>}
                   {formData.timezone && <span className="flex items-center gap-1.5"><Globe className="h-4 w-4 text-blue-400" /> {formData.timezone}</span>}
                 </div>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-4 mt-4">
+              <div className="bg-gray-100 px-3 py-1 rounded-full text-sm">
+                <span className="font-semibold">{user?.completedPairsCount || 0}</span> Completed Exchanges
+              </div>
+              <div className="bg-gray-100 px-3 py-1 rounded-full text-sm">
+                <span className="font-semibold">{user?.ratingAverage?.toFixed(1) || 0}</span> Average Rating
               </div>
             </div>
           </div>
@@ -335,9 +344,8 @@ const Profile = () => {
                         <p className="font-bold text-gray-900">{skill.name}</p>
                         <div className="flex gap-2 mt-1">
                           <span className="text-[10px] font-black uppercase text-blue-500">{skill.level}</span>
-                          <span className={`text-[10px] font-black uppercase px-2 rounded-md ${
-                            skill.priority === 'high' ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'
-                          }`}>
+                          <span className={`text-[10px] font-black uppercase px-2 rounded-md ${skill.priority === 'high' ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'
+                            }`}>
                             {skill.priority}
                           </span>
                         </div>

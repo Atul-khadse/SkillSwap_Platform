@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { userAPI, sessionAPI, ratingAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { pairAPI } from '../services/api';
 import toast from 'react-hot-toast';
 import {
   Users,
@@ -77,6 +78,44 @@ const MatchedPairs = () => {
       toast.error(error.response?.data?.message || 'Failed to submit rating');
     }
   };
+
+  // Add function inside component
+  const handleCompletePair = async (pair) => {
+    const otherUser = getOtherUser(pair);
+    if (window.confirm(`Are you sure you want to complete this exchange with ${otherUser.name}? This will end the partnership and count as a successful exchange.`)) {
+      try {
+        await pairAPI.completePair(pair._id);
+        toast.success('Pair completed successfully!');
+        fetchMatchedPairs(); // Refresh list
+        // Optionally refresh user data to update completedPairsCount
+        window.location.reload(); // simple way to refresh user context
+      } catch (error) {
+        toast.error(error.response?.data?.message || 'Failed to complete pair');
+      }
+    }
+  };
+
+  const getCompletionStatus = (pair) => {
+    if (!user) return { myCompleted: false, otherCompleted: false };
+    if (pair.user1?._id === user._id) {
+      return { myCompleted: pair.user1Completed, otherCompleted: pair.user2Completed };
+    } else {
+      return { myCompleted: pair.user2Completed, otherCompleted: pair.user1Completed };
+    }
+  };
+
+  const handleMarkTeachingComplete = async (pair) => {
+    try {
+      const response = await pairAPI.completeUserTeaching(pair._id);
+      toast.success('Teaching marked as complete!');
+      fetchMatchedPairs(); // refresh the list
+      // Optionally refresh user data
+      window.location.reload(); // simple way to refresh user context
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to mark completion');
+    }
+  };
+
 
   useEffect(() => {
     if (user) {
@@ -237,6 +276,7 @@ const MatchedPairs = () => {
             const otherUser = getOtherUser(pair);
             const skillTaught = getSkillTaughtByCurrentUser(pair);
             const skillLearned = getSkillLearnedByCurrentUser(pair);
+            const { myCompleted, otherCompleted } = getCompletionStatus(pair);
 
             return (
               <div key={pair._id} className="bg-white rounded-xl shadow-sm overflow-hidden">
@@ -323,17 +363,25 @@ const MatchedPairs = () => {
                     )}
                   </div>
 
-                  <div className="mt-6 flex space-x-3">
+                  <div className="flex justify-between items-center mt-2 text-xs text-gray-500">
+                    <span>
+                      You {myCompleted ? '✔️ Completed' : '⏳ Not completed'}
+                    </span>
+                    <span>
+                      {otherUser.name} {otherCompleted ? '✔️ Completed' : '⏳ Not completed'}
+                    </span>
+                  </div>
+                  <div className="mt-4 sm:mt-6 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:gap-2 sm:justify-start">
                     <button
                       onClick={() => startSession(pair)}
-                      className="flex-1 border border-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:cursor-pointer hover:bg-gray-50 transition flex items-center justify-center"
+                      className="col-span-1 w-full sm:w-auto border border-gray-300 text-gray-700 py-2 px-3 rounded-lg hover:bg-gray-50 transition flex items-center justify-center text-sm"
                     >
                       <Video className="h-4 w-4 mr-2" />
                       Start Session
                     </button>
                     <Link
                       to={`/session/${pair._id}`}
-                      className="flex-1 border border-gray-300 text-gray-700  py-2 px-4 rounded-lg hover:bg-gray-50  transition flex items-center justify-center"
+                      className="col-span-1 w-full sm:w-auto border border-gray-300 text-gray-700 py-2 px-3 rounded-lg hover:bg-gray-50 transition flex items-center justify-center text-sm"
                     >
                       <MessageCircle className="h-4 w-4 mr-2" />
                       View Dashboard
@@ -343,17 +391,40 @@ const MatchedPairs = () => {
                         setSelectedPair(pair);
                         setShowCreateSession(true);
                       }}
-                      className="border hover:cursor-pointer border-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-50 transition"
+                      className="col-span-1 w-full sm:w-auto border border-gray-300 text-gray-700 py-2 px-3 rounded-lg hover:bg-gray-50 transition flex items-center justify-center text-sm"
                       title="Schedule Session"
                     >
                       <Plus className="h-4 w-4" />
                     </button>
                     <button
                       onClick={() => handleRatePartner(otherUser)}
-                      className="border border-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-50 transition"
+                      className="col-span-1 w-full sm:w-auto border border-gray-300 text-gray-700 py-2 px-3 rounded-lg hover:bg-gray-50 transition text-sm flex items-center justify-center"
                     >
                       Rate Partner
                     </button>
+                    {/* Teaching Completion Button */}
+                    {!myCompleted && (
+                      <button
+                        onClick={() => handleMarkTeachingComplete(pair)}
+                        className="col-span-1 w-full sm:w-auto border border-blue-500 text-blue-600 py-2 px-3 rounded-lg hover:bg-blue-50 transition text-sm flex items-center justify-center"
+                      >
+                        Mark My Teaching Complete
+                      </button>
+                    )}
+                    {/* If both are completed, show a message or allow manual finalisation */}
+                    {myCompleted && otherCompleted && pair.status === 'active' && (
+                      <button
+                        onClick={() => handleCompletePair(pair)}
+                        className="col-span-1 w-full sm:w-auto border border-green-500 text-green-600 py-2 px-3 rounded-lg hover:bg-green-50 transition text-sm flex items-center justify-center"
+                      >
+                        Complete Exchange (both finished)
+                      </button>
+                    )}
+
+                    {/* If already completed, show a badge */}
+                    {pair.status === 'completed' && (
+                      <span className="col-span-2 sm:col-span-1 text-green-600 font-medium text-sm text-center py-2">✓ Exchange completed</span>
+                    )}
                   </div>
                 </div>
               </div>
